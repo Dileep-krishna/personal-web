@@ -1,11 +1,51 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
 import { Link } from 'react-router-dom';
-import { Row, Col, Container } from 'react-bootstrap';
+import { Row, Col, Container, Spinner, Badge, Modal, Form, InputGroup } from 'react-bootstrap';
+import axios from 'axios';
+
+import profile from "./profile.jpeg"; 
+
 
 function Project() {
-    const projects = [
+    const [projects, setProjects] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filter, setFilter] = useState('all');
+    const [showProjectModal, setShowProjectModal] = useState(false);
+    const [selectedProject, setSelectedProject] = useState(null);
+
+    // API call to get all projects
+    useEffect(() => {
+        getAllProjects();
+    }, []);
+
+    const getAllProjects = async () => {
+        try {
+            setLoading(true);
+            const response = await axios.get('http://localhost:4000/all-project');
+            
+            if (response.data.success) {
+                // If the API returns data in response.data.data
+                const projectData = response.data.data || response.data.projects || [];
+                setProjects(projectData);
+            } else {
+                setProjects([]);
+            }
+        } catch (error) {
+            console.error('Error fetching projects:', error);
+            setError('Failed to load projects. Please try again later.');
+            // Fallback to static data if API fails
+            setProjects(getStaticProjects());
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Fallback static data
+    const getStaticProjects = () => [
         {
             id: 1,
             title: "Gamers-Connect",
@@ -14,158 +54,350 @@ function Project() {
             github: "#",
             live: "#"
         },
-        {
-            id: 2,
-            title: "Bookstore",
-            image: "https://mir-s3-cdn-cf.behance.net/project_modules/1400/ac0719152551919.63218886992b6.gif",
-            description: "Online bookstore application with full CRUD operations, Google Login authentication, and secure checkout process. Responsive interface for seamless shopping experience.",
-            github: "#",
-            live: "#"
-        },
-        {
-            id: 3,
-            title: "Table Track – Restaurant Management Website",
-            image: "https://tse4.mm.bing.net/th/id/OIP.gpYHPqqeVRwDpyi2QXHwaAHaD4?pid=Api&P=0&h=180",
-            description: "A responsive restaurant management web app built with React.js and Tailwind CSS, featuring table, menu, and order management. Integrated with JSON Server for full API functionality and collaborative team development using GitHub",
-            github: "https://github.com/Dileep-krishna/table-track-task",
-            live: "https://resturent-bookin-frontend.vercel.app"
-        },
-        {
-            id: 4,
-            title: "Weather App",
-            image: "https://i.pinimg.com/originals/bd/72/d1/bd72d10c741dde2ce2684577ffa0d86f.gif",
-            description: "Real-time weather forecasting application with interactive maps, location-based forecasts, and severe weather alerts. Supports multiple cities and detailed metrics.",
-            github: "#",
-            live: "https://wether-app-gules.vercel.app"
-        },
-        {
-            id: 5,
-            title: "Resume Builder",
-            image: "https://miro.medium.com/v2/resize:fit:1024/1*2-VCsvRuL_RS1fNBsKnCjw.jpeg",
-            description: "A dynamic Resume Builder application developed using React, Bootstrap, and Material UI, featuring full CRUD functionality. Designed an intuitive user interface that allows users to easily create, edit, and manage resumes efficiently..",
-            github: "https://github.com/Dileep-krishna/protfolio-builder",
-            live: "https://protfolio-builder-vert.vercel.app"
-        },
-        {
-            id: 6,
-            title: "Recipe Finder",
-            image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-            description: "Recipe discovery platform with ingredient-based search, dietary filters, step-by-step cooking instructions, and user rating system.",
-            github: "#",
-            live: "#"
-        },
-        {
-            id: 7,
-            title: "Fitness Tracker",
-            image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-            description: "Comprehensive fitness application with workout plans, progress tracking, calorie counter, and integration with wearable devices.",
-            github: "#",
-            live: "#"
-        },
-        {
-            id: 8,
-            title: "E-Commerce Platform",
-            image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-            description: "Full-featured e-commerce solution with shopping cart, payment gateway integration, order management, and admin dashboard.",
-            github: "#",
-            live: "#"
-        },
-        {
-            id: 9,
-            title: "Portfolio Website",
-            image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-            description: "Modern portfolio website with dark/light mode toggle, project showcase, blog section, and contact form with email integration.",
-            github: "#",
-            live: "#"
-        },
-        {
-            id: 10,
-            title: "Chat Application",
-            image: "https://images.unsplash.com/photo-1587560699334-cc4ff634909a?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-            description: "Real-time chat application with group chats, file sharing, message encryption, and online status indicators using WebSocket technology.",
-            github: "#",
-            live: "#"
-        }
+        // ... rest of your static projects
     ];
+
+    const filteredProjects = projects.filter(project => {
+        const matchesSearch = project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            project.description.toLowerCase().includes(searchTerm.toLowerCase());
+        
+        if (filter === 'all') return matchesSearch;
+        if (filter === 'live') return matchesSearch && project.live && project.live !== '#';
+        if (filter === 'github') return matchesSearch && project.github && project.github !== '#';
+        return matchesSearch;
+    });
+
+    const handleProjectClick = (project) => {
+        setSelectedProject(project);
+        setShowProjectModal(true);
+    };
+
+    const ProjectModal = () => (
+        <Modal 
+            show={showProjectModal} 
+            onHide={() => setShowProjectModal(false)}
+            centered
+            size="lg"
+            className="project-modal"
+        >
+            {selectedProject && (
+                <>
+                    <Modal.Header 
+                        closeButton 
+                        style={{ 
+                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                            color: 'white',
+                            borderBottom: 'none'
+                        }}
+                    >
+                        <Modal.Title className="d-flex align-items-center">
+                            <i className="bi bi-stack me-2"></i>
+                            {selectedProject.title}
+                        </Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body style={{ padding: 0 }}>
+                        <div className="position-relative">
+                            <img 
+                                src={`http://localhost:4000/imguploads/${selectedProject.image}`} 
+                                alt={selectedProject.title}
+                                style={{ 
+                                    width: '100%', 
+                                    height: '300px', 
+                                    objectFit: 'cover' 
+                                }}
+                            />
+                            <div style={{
+                                position: 'absolute',
+                                bottom: '20px',
+                                left: '20px',
+                                background: 'rgba(0,0,0,0.7)',
+                                padding: '10px 20px',
+                                borderRadius: '20px',
+                                color: 'white'
+                            }}>
+                                <Badge bg="primary">Project #{selectedProject.id}</Badge>
+                            </div>
+                        </div>
+                        <div className="p-4">
+                            <h5 className="mb-3">Project Description</h5>
+                            <p>{selectedProject.description}</p>
+                            
+                            <div className="d-flex gap-3 mb-4">
+                                {selectedProject.technologies && selectedProject.technologies.map((tech, index) => (
+                                    <Badge key={index} bg="secondary" pill>
+                                        {tech}
+                                    </Badge>
+                                ))}
+                            </div>
+                            
+                            <div className="row">
+                                <div className="col-md-6 mb-3">
+                                    <Button 
+                                        href={selectedProject.github} 
+                                        target="_blank"
+                                        variant="outline-dark"
+                                        className="w-100 d-flex align-items-center justify-content-center"
+                                        disabled={!selectedProject.github || selectedProject.github === '#'}
+                                    >
+                                        <i className="bi bi-github me-2"></i>
+                                        View Code
+                                    </Button>
+                                </div>
+                                <div className="col-md-6 mb-3">
+                                    <Button 
+                                        href={selectedProject.live} 
+                                        target="_blank"
+                                        variant="primary"
+                                        className="w-100 d-flex align-items-center justify-content-center"
+                                        style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}
+                                        disabled={!selectedProject.live || selectedProject.live === '#'}
+                                    >
+                                        <i className="bi bi-rocket-takeoff me-2"></i>
+                                        Live..
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+                    </Modal.Body>
+                </>
+            )}
+        </Modal>
+    );
 
     return (
         <div className='project-container' style={{
-            backgroundImage: "url(https://wallpapers.com/images/high/gray-best-laptop-beside-iphone-aav9zfw3u9lzah0n.webp)",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundAttachment: "fixed",
-            minHeight: "100vh",
-            padding: "20px 0"
+            background: 'linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)',
+            backgroundSize: '400% 400%',
+            animation: 'gradient 15s ease infinite',
+            minHeight: '100vh',
+            padding: '20px 0'
         }}>
-            <Container fluid>
+            <style>
+                {`
+                @keyframes gradient {
+                    0% { background-position: 0% 50%; }
+                    50% { background-position: 100% 50%; }
+                    100% { background-position: 0% 50%; }
+                }
+                
+                .project-card {
+                    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    backdrop-filter: blur(10px);
+                    background: rgba(255, 255, 255, 0.05);
+                    overflow: hidden;
+                    position: relative;
+                }
+                
+                .project-card::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    height: 4px;
+                    background: linear-gradient(90deg, #667eea, #764ba2);
+                    transform: scaleX(0);
+                    transition: transform 0.3s ease;
+                }
+                
+                .project-card:hover::before {
+                    transform: scaleX(1);
+                }
+                
+                .project-card:hover {
+                    transform: translateY(-15px) scale(1.02);
+                    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+                    border-color: rgba(102, 126, 234, 0.3);
+                }
+                
+                .tech-badge {
+                    transition: all 0.3s ease;
+                }
+                
+                .tech-badge:hover {
+                    transform: translateY(-2px);
+                }
+                
+                .glass-effect {
+                    background: rgba(255, 255, 255, 0.1);
+                    backdrop-filter: blur(10px);
+                    border: 1px solid rgba(255, 255, 255, 0.2);
+                }
+                
+                .project-modal .modal-content {
+                    border-radius: 15px;
+                    overflow: hidden;
+                    border: none;
+                    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+                }
+                `}
+            </style>
+
+            <Container fluid className="px-lg-5">
                 <div className="d-flex flex-column flex-lg-row">
                     {/* Left Side - Header and Information */}
-                    <div className="left-side col-lg-3 mb-4 mb-lg-0 pe-lg-4" style={{ minHeight: '100vh' }}>
-                        {/* Header Section */}
+                    <div className="left-side col-lg-3 mb-4 mb-lg-0 pe-lg-4">
                         <div className="sticky-top pt-4" style={{ top: '20px' }}>
+                            {/* Header Section */}
                             <div className="mb-5">
-                                <h1 className="text-warning display-4 fw-bold">My Projects</h1>
-                                <p className="text-light lead">A collection of my recent work and projects</p>
+                       <div className="d-flex align-items-center gap-3">
+  {/* Circular Image */}
+  <img
+    src={profile}  // change to your image path
+    alt="Profile"
+    className="rounded-circle border"
+    style={{
+      width: "55px",
+      height: "55px",
+      objectFit: "cover"
+    }}
+  />
+
+  {/* Text */}
+  <div>
+    <h1
+      className="text-white fw-bold mb-0"
+      style={{ fontSize: "2.5rem" }}
+    >
+      My Projects
+    </h1>
+    <p className="text-light opacity-75 mb-0">
+      Crafted with passion and precision
+    </p>
+  </div>
+</div>
+
                             </div>
                             
                             {/* Back Button */}
                             <div className="mb-5">
                                 <Link to="/" className="text-decoration-none">
-                                    <Button variant="danger" size="lg" className="px-5 py-3">
-                                        <i className="bi bi-arrow-left me-2"></i>
+                                    <Button 
+                                        variant="outline-light" 
+                                        size="lg" 
+                                        className="w-100 py-3 d-flex align-items-center justify-content-center"
+                                        style={{
+                                            borderRadius: '12px',
+                                            borderWidth: '2px',
+                                            transition: 'all 0.3s ease'
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.target.style.transform = 'translateX(-5px)';
+                                            e.target.style.background = 'rgba(255, 255, 255, 0.1)';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.target.style.transform = 'translateX(0)';
+                                            e.target.style.background = 'transparent';
+                                        }}
+                                    >
+                                        <i className="bi bi-arrow-left me-3 fs-4"></i>
                                         Back to Home
                                     </Button>
                                 </Link>
                             </div>
                             
                             {/* Statistics Section */}
-                            <div className="text-light mb-5">
-                                <h4 className="text-warning mb-4">Project Stats</h4>
-                                <div className="d-flex justify-content-between mb-3">
-                                    <span>Total Projects:</span>
-                                    <span className="fw-bold">{projects.length}</span>
+                            <div className="glass-effect rounded-3 p-4 mb-5">
+                                <h4 className="text-warning mb-4 d-flex align-items-center">
+                                    <i className="bi bi-bar-chart-fill me-2"></i>
+                                    Project Analytics
+                                </h4>
+                                <div className="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-light border-opacity-25">
+                                    <span className="text-light">Total Projects</span>
+                                    <Badge pill bg="primary" className="fs-6 px-3 py-2">
+                                        {projects.length}
+                                    </Badge>
                                 </div>
-                                <div className="d-flex justify-content-between mb-3">
-                                    <span>Completed:</span>
-                                    <span className="fw-bold text-success">10</span>
-                                </div>
-                                <div className="d-flex justify-content-between mb-3">
-                                    <span>In Progress:</span>
-                                    <span className="fw-bold text-warning">0</span>
-                                </div>
+                                {/* <div className="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-light border-opacity-25">
+                                    <span className="text-light">Live Demos</span>
+                                    <Badge pill bg="success" className="fs-6 px-3 py-2">
+                                        {projects.filter(p => p.live && p.live !== '#').length}
+                                    </Badge>
+                                </div> */}
+                                {/* <div className="d-flex justify-content-between align-items-center">
+                                    <span className="text-light">GitHub Repos</span>
+                                    <Badge pill bg="dark" className="fs-6 px-3 py-2">
+                                        {projects.filter(p => p.github && p.github !== '#').length}
+                                    </Badge>
+                                </div> */}
                             </div>
                             
                             {/* Technologies Used */}
-                            <div className="text-light mb-5">
-                                <h4 className="text-warning mb-4">Technologies</h4>
+                            <div className="glass-effect rounded-3 p-4 mb-5">
+                                <h4 className="text-warning mb-4 d-flex align-items-center">
+                                    <i className="bi bi-tools me-2"></i>
+                                    Tech Stack
+                                </h4>
                                 <div className="d-flex flex-wrap gap-2">
-                                    <span className="badge bg-primary p-2">React.js</span>
-                                    <span className="badge bg-success p-2">Bootstrap</span>
-                                    <span className="badge bg-info p-2">JavaScript</span>
-                                    <span className="badge bg-warning p-2">HTML/CSS</span>
-                                    <span className="badge bg-danger p-2">API Integration</span>
-                                    <span className="badge bg-secondary p-2">GitHub</span>
+                                    {['React.js', 'Bootstrap', 'JavaScript', 'Node.js', 'MongoDB', 'Express', 'API', 'Git'].map((tech, index) => (
+                                        <Badge 
+                                            key={index} 
+                                            bg="secondary" 
+                                            className="tech-badge p-2 px-3"
+                                            style={{
+                                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                                border: 'none',
+                                                cursor: 'pointer'
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                e.target.style.transform = 'translateY(-2px)';
+                                                e.target.style.boxShadow = '0 5px 15px rgba(102, 126, 234, 0.4)';
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.target.style.transform = 'translateY(0)';
+                                                e.target.style.boxShadow = 'none';
+                                            }}
+                                        >
+                                            {tech}
+                                        </Badge>
+                                    ))}
                                 </div>
                             </div>
                             
                             {/* Contact Information */}
-                            <div className="text-light">
-                                <h4 className="text-warning mb-4">Get In Touch</h4>
+                            <div className="glass-effect rounded-3 p-4">
+                                <h4 className="text-warning mb-4 d-flex align-items-center">
+                                    <i className="bi bi-chat-dots-fill me-2"></i>
+                                    Let's Connect
+                                </h4>
                                 <div className="mb-3">
-                                    <i className="bi bi-envelope me-2 text-warning"></i>
-                                    <a href="mailto:dileepkrishna7178@gmail.com" className="text-light text-decoration-none">
-                                        dileepkrishna7178@gmail.com
+                                    <a href="mailto:dileepkrishna7178@gmail.com" className="text-light text-decoration-none d-flex align-items-center">
+                                        <div style={{
+                                            width: '40px',
+                                            height: '40px',
+                                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                            borderRadius: '10px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            marginRight: '10px'
+                                        }}>
+                                            <i className="bi bi-envelope text-white"></i>
+                                        </div>
+                                        <span>dileepkrishna7178@gmail.com</span>
                                     </a>
                                 </div>
                                 <div className="mb-3">
-                                    <i className="bi bi-github me-2 text-warning"></i>
-                                    <a href="https://github.com/Dileep-krishna" target="_blank" rel="noopener noreferrer" className="text-light text-decoration-none">
-                                        GitHub Profile
+                                    <a href="https://github.com/Dileep-krishna" target="_blank" rel="noopener noreferrer" className="text-light text-decoration-none d-flex align-items-center">
+                                        <div style={{
+                                            width: '40px',
+                                            height: '40px',
+                                            background: '#333',
+                                            borderRadius: '10px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            marginRight: '10px'
+                                        }}>
+                                            <i className="bi bi-github text-white"></i>
+                                        </div>
+                                        <span>GitHub Profile</span>
                                     </a>
                                 </div>
-                                <div className="text-center mt-4 pt-3 border-top border-light">
-                                    <p className="mb-0 text-warning">
-                                        <i className="bi bi-code-slash me-2"></i>
+                                <div className="text-center mt-4 pt-3 border-top border-light border-opacity-25">
+                                    <p className="mb-0 text-warning d-flex align-items-center justify-content-center">
+                                        <i className="bi bi-heart-fill me-2 text-danger"></i>
                                         Made by Dileep Krishna
                                     </p>
                                 </div>
@@ -175,71 +407,205 @@ function Project() {
 
                     {/* Right Side - Projects Grid */}
                     <div className="right-side col-lg-9">
-                        {/* Projects Grid */}
-                        <Row xs={1} md={2} className="g-4">
-                            {projects.map((project) => (
-                                <Col key={project.id}>
-                                    <Card className="h-100 shadow-lg border-0 project-card">
-                                        <Card.Img
-                                            variant="top"
-                                            src={project.image}
-                                            style={{ 
-                                                height: '200px', 
-                                                objectFit: 'cover',
-                                                borderTopLeftRadius: '0.375rem',
-                                                borderTopRightRadius: '0.375rem'
+                        {/* Search and Filter Section */}
+                        <div className="glass-effect rounded-3 p-4 mb-4">
+                            <div className="row align-items-center">
+                                <div className="col-md-6 mb-3 mb-md-0">
+                                    <InputGroup>
+                                        <InputGroup.Text style={{ 
+                                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                            border: 'none',
+                                            color: 'white'
+                                        }}>
+                                            <i className="bi bi-search"></i>
+                                        </InputGroup.Text>
+                                        <Form.Control
+                                            type="text"
+                                            placeholder="Search projects..."
+                                            value={searchTerm}
+                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                            style={{
+                                                background: 'rgba(255, 255, 255, 0.1)',
+                                                border: '1px solid rgba(255, 255, 255, 0.2)',
+                                                color: 'white'
                                             }}
                                         />
-                                        <Card.Body className="d-flex flex-column">
-                                            <Card.Title className="text-primary fw-bold">
-                                                {project.title}
-                                            </Card.Title>
-                                            <Card.Text className="flex-grow-1">
-                                                {project.description}
-                                            </Card.Text>
-                                            <div className="d-flex justify-content-between mt-auto pt-3">
-                                                <a 
-                                                    href={project.github} 
-                                                    target="_blank" 
-                                                    rel="noopener noreferrer"
-                                                    className="text-decoration-none"
-                                                >
-                                                    <Button variant="outline-primary" className="px-4">
-                                                        <i className="bi bi-github me-2"></i>
-                                                        GitHub
-                                                    </Button>
-                                                </a>
-                                                <a 
-                                                    href={project.live} 
-                                                    target="_blank" 
-                                                    rel="noopener noreferrer"
-                                                    className="text-decoration-none"
-                                                >
-                                                    <Button variant="success" className="px-4">
-                                                        <i className="bi bi-rocket-takeoff me-2"></i>
-                                                        Live Demo
-                                                    </Button>
-                                                </a>
-                                            </div>
-                                        </Card.Body>
-                                        <Card.Footer className="text-muted text-center">
-                                            Project #{project.id}
-                                        </Card.Footer>
-                                    </Card>
-                                </Col>
-                            ))}
-                        </Row>
-
-                        {/* Additional Footer (Optional) */}
-                        <div className="text-center mt-5 pt-4 d-lg-none">
-                            <a href="mailto:dileepkrishna7178@gmail.com" className="text-warning text-decoration-none">
-                                <i className="bi bi-envelope me-2"></i>
-                                Made by Dileep Krishna
-                            </a>
+                                    </InputGroup>
+                                </div>
+                                <div className="col-md-6">
+                                    <div className="d-flex flex-wrap gap-2">
+                                        {['all', 'live', 'github'].map((filterType) => (
+                                            <Button
+                                                key={filterType}
+                                                variant={filter === filterType ? 'primary' : 'outline-light'}
+                                                onClick={() => setFilter(filterType)}
+                                                className="text-capitalize"
+                                                style={{
+                                                    background: filter === filterType 
+                                                        ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' 
+                                                        : 'transparent',
+                                                    border: filter === filterType ? 'none' : '1px solid rgba(255, 255, 255, 0.3)'
+                                                }}
+                                            >
+                                                {filterType === 'all' ? 'All Projects' : 
+                                                 filterType === 'live' ? 'Live Demos' : 'GitHub Repos'}
+                                            </Button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
+
+                        {/* Loading State */}
+                        {loading && (
+                            <div className="text-center py-5">
+                                <div className="spinner-border text-primary" role="status" style={{ width: '3rem', height: '3rem' }}>
+                                    <span className="visually-hidden">Loading...</span>
+                                </div>
+                                <p className="text-light mt-3">Loading amazing projects...</p>
+                            </div>
+                        )}
+
+                        {/* Error State */}
+                        {error && !loading && (
+                            <div className="alert alert-danger" role="alert">
+                                {error}
+                            </div>
+                        )}
+
+                        {/* Projects Grid */}
+                        {!loading && !error && (
+                            <>
+                                <Row xs={1} md={2} xl={3} className="g-4">
+                                    {filteredProjects.map((project, index) => (
+                                        <Col key={project._id || project.id || index}>
+                                            <Card 
+                                                className="h-100 shadow-lg border-0 project-card"
+                                                onClick={() => handleProjectClick(project)}
+                                                style={{ cursor: 'pointer' }}
+                                            >
+                                                <div className="position-relative">
+                                                    <Card.Img
+                                                        variant="top"
+                                                        src={`http://localhost:4000/imguploads/${project.image}`}
+                                                        style={{ 
+                                                            height: '200px', 
+                                                            objectFit: 'cover'
+                                                        }}
+                                                    />
+                                                    <div style={{
+                                                        position: 'absolute',
+                                                        top: '10px',
+                                                        right: '10px',
+                                                        background: 'rgba(0,0,0,0.7)',
+                                                        borderRadius: '20px',
+                                                        padding: '5px 15px'
+                                                    }}>
+                                                        <Badge bg="transparent" className="text-white">
+                                                            #{project.id || index + 1}
+                                                        </Badge>
+                                                    </div>
+                                                </div>
+                                                <Card.Body className="d-flex flex-column">
+                                                    <div className="d-flex justify-content-between align-items-start mb-2">
+                                                        <Card.Title className="text-white fw-bold">
+                                                            {project.title}
+                                                        </Card.Title>
+                                                        <div className="d-flex gap-1">
+                                                            {project.live && project.live !== '#' && (
+                                                                <i className="bi bi-rocket-takeoff text-success"></i>
+                                                            )}
+                                                            {project.github && project.github !== '#' && (
+                                                                <i className="bi bi-github text-light"></i>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    <Card.Text className="text-light opacity-75 flex-grow-1" style={{
+                                                        fontSize: '0.9rem',
+                                                        lineHeight: '1.5'
+                                                    }}>
+                                                        {project.description.length > 120 
+                                                            ? `${project.description.substring(0, 120)}...` 
+                                                            : project.description}
+                                                    </Card.Text>
+                                                    <div className="d-flex justify-content-between mt-3 pt-3 border-top border-light border-opacity-25">
+                                                        <Button 
+                                                            variant="outline-light" 
+                                                            size="sm"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                window.open(project.github, '_blank');
+                                                            }}
+                                                            disabled={!project.github || project.github === '#'}
+                                                        >
+                                                            <i className="bi bi-github me-1"></i>
+                                                            Code
+                                                        </Button>
+                                                        <Button 
+                                                            variant="primary" 
+                                                            size="sm"
+                                                            style={{
+                                                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                                                border: 'none'
+                                                            }}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                window.open(project.live, '_blank');
+                                                            }}
+                                                            disabled={!project.live || project.live === '#'}
+                                                        >
+                                                            <i className="bi bi-rocket-takeoff me-1"></i>
+                                                            Live....
+                                                        </Button>
+                                                    </div>
+                                                </Card.Body>
+                                            </Card>
+                                        </Col>
+                                    ))}
+                                </Row>
+
+                                {/* Empty State */}
+                                {filteredProjects.length === 0 && (
+                                    <div className="text-center py-5">
+                                        <div style={{
+                                            width: '150px',
+                                            height: '150px',
+                                            margin: '0 auto 30px',
+                                            background: 'rgba(255, 255, 255, 0.1)',
+                                            borderRadius: '50%',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center'
+                                        }}>
+                                            <i className="bi bi-folder-x text-light" style={{ fontSize: '4rem' }}></i>
+                                        </div>
+                                        <h4 className="text-light mb-3">No Projects Found</h4>
+                                        <p className="text-light opacity-75 mb-4">Try adjusting your search or filter</p>
+                                        <Button 
+                                            variant="outline-light"
+                                            onClick={() => {
+                                                setSearchTerm('');
+                                                setFilter('all');
+                                            }}
+                                        >
+                                            <i className="bi bi-arrow-clockwise me-2"></i>
+                                            Reset Filters
+                                        </Button>
+                                    </div>
+                                )}
+
+                                {/* Results Count */}
+                                <div className="mt-4 text-light opacity-75">
+                                    Showing {filteredProjects.length} of {projects.length} projects
+                                </div>
+                            </>
+                        )}
                     </div>
                 </div>
             </Container>
+
+            {/* Project Detail Modal */}
+            <ProjectModal />
         </div>
     );
 }

@@ -1,4 +1,4 @@
-const SERVERURL="http://localhost:5174"
+const SERVERURL="http://localhost:4000"
 
 
 export default SERVERURL
