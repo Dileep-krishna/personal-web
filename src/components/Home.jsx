@@ -1,61 +1,115 @@
 import React, { useState, useEffect } from "react";
+import { getAllSkillAPI, getProjectAPI } from "../services/allAPI"; // Make sure getProjectAPI is imported
+import axios from "axios";
 
 const Home = () => {
-  // State for dynamic data (will be fetched from backend)
+  // State for dynamic data
   const [userData, setUserData] = useState(null);
-  const [skills, setSkills] = useState(null);
+  const [skills, setSkills] = useState({
+    frontend: [],
+    backend: [],
+    tools: []
+  });
+  const [projects, setProjects] = useState([]); // New state for projects
   const [loading, setLoading] = useState(true);
+  const [projectLoading, setProjectLoading] = useState(true); // Loading state for projects
+  const [profileImage, setProfileImage] = useState("");
+  const [description, setDescription] = useState("");
 
-  // Mock data for demonstration - replace with actual API calls
-  useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      setUserData({
-        name: "Dileep Krishna",
-        title: "MERN Stack Developer",
-        email: "dileep@gmail.com",
-        phone: "+91 98765 43210",
-        location: "India",
-        linkedin: "https://linkedin.com/in/your-profile",
-        description: "I'm a BCA student and aspiring MERN Stack Developer. I enjoy building modern, responsive web applications and learning new technologies.",
-        degree: "BCA",
-        profileImage: "blob:https://web.whatsapp.com/3a5d532f-7420-48f8-b590-759dec60b1d3"
-      });
+  const ADMIN_ID = "695e53041570a0de247b4d89"; 
 
+  // Fetch skills from backend API
+  const fetchSkills = async () => {
+    try {
+      const response = await getAllSkillAPI();
+      if (response) {
+        const skillsData = response.data || response;
+        setSkills({
+          frontend: skillsData.frontend || [],
+          backend: skillsData.backend || [],
+          tools: skillsData.tools || []
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching skills:", error);
       setSkills({
-        frontend: [
-          { name: "HTML5 & CSS3", level: 90 },
-          { name: "JavaScript (ES6+)", level: 85 },
-          { name: "React.js", level: 80 },
-          { name: "Redux / Context API", level: 75 },
-          { name: "Figma", level: 85 },
-          { name: "Bootstrap / Tailwind", level: 85 }
-        ],
-        backend: [
-          { name: "Node.js", level: 80 },
-          { name: "Express.js", level: 75 },
-          { name: "MongoDB & Mongoose", level: 75 },
-          { name: "JWT / RBAC / OAuth2", level: 70 },
-          { name: "REST API", level: 70 }
-        ],
-        tools: [
-          { name: "Git & GitHub", level: 85 },
-          { name: "Postman", level: 80 },
-          { name: "VS Code", level: 90 },
-          { name: "Vercel / Netlify", level: 75 },
-          { name: "MongoDB Atlas", level: 75 }
-        ]
+        frontend: [],
+        backend: [],
+        tools: []
       });
+    }
+  };
 
-      setLoading(false);
-    }, 1000);
+  // Fetch projects from backend API
+  const fetchProjects = async () => {
+    try {
+      setProjectLoading(true);
+      const response = await getProjectAPI();
+      if (response && response.data) {
+        // Take first 4-5 projects or all if less than 5
+        const projectsData = response.data.slice(0, 5);
+        setProjects(projectsData);
+      }
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+      setProjects([]);
+    } finally {
+      setProjectLoading(false);
+    }
+  };
+
+  // Fetch user data and skills on component mount
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        // Fetch admin profile & description
+        try {
+          const res = await axios.get(`http://localhost:4000/admin/profile/${ADMIN_ID}`);
+          const data = res.data;
+          setDescription(data.description || "");
+          setProfileImage(data.profile ? `http://localhost:4000/${data.profile}` : "");
+        } catch (error) {
+          console.error("Error fetching admin profile:", error);
+        }
+
+        // Fetch skills from API
+        await fetchSkills();
+
+        // Fetch projects from API
+        await fetchProjects();
+
+        // Set user data
+        setUserData({
+          name: "Dileep Krishna",
+          title: "MEARN Stack Developer",
+          email: "dileepkrishna7178@gmail.com",
+          phone: "+91 8590206267",
+          location: "India",
+          linkedin: "https://linkedin.com/in/dileepkrishna-t",
+          description: "I'm a BCA student and aspiring MEARN Stack Developer. I enjoy building modern, responsive web applications and learning new technologies.",
+          degree: "BCA",
+          profileImage: "" // Add your image URL here
+        });
+
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
 
   if (loading) {
     return (
       <div className="container-fluid bg-dark text-light min-vh-100 d-flex align-items-center justify-content-center">
-        <div className="spinner-border text-info" role="status">
-          <span className="visually-hidden">Loading...</span>
+        <div className="text-center">
+          <div className="spinner-border text-info" role="status" style={{ width: '3rem', height: '3rem' }}>
+            <span className="visually-hidden">Loading...</span>
+          </div>
+          <p className="mt-3 text-info">Loading Portfolio...</p>
         </div>
       </div>
     );
@@ -64,244 +118,175 @@ const Home = () => {
   return (
     <div className="bg-dark text-light">
       {/* Hero Section */}
-      <section 
+      <section
         className="container-fluid bg-dark d-flex align-items-center min-vh-100"
-        style={{ 
-          backgroundImage: "linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url(https://wallpapers.com/images/high/gray-best-laptop-beside-iphone-aav9zfw3u9lzah0n.webp)",
+        style={{
+          backgroundImage: "linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.9)), url(https://wallpapers.com/images/high/gray-best-laptop-beside-iphone-aav9zfw3u9lzah0n.webp)",
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          backgroundAttachment: 'fixed'
+          backgroundAttachment: 'fixed',
+          position: 'relative',
+          overflow: 'hidden'
         }}
         id="home"
       >
-        <div className="container py-5">
+        <div className="container py-5 position-relative z-1">
           <div className="row align-items-center">
             {/* Left Content */}
             <div className="col-lg-6 text-center text-lg-start mb-5 mb-lg-0">
-              <h5 className="text-info mb-2">Hello, I'm</h5>
-              <h1 className="fw-bold display-4 mb-3">{userData.name}</h1>
-              <h2 className="text-info mb-4">{userData.title}</h2>
-              <p className="lead mb-4 text-light">
-                I build responsive, user-friendly web applications using
-                React, Node.js, Express, and MongoDB.
+              <h5 className="text-info mb-2 animate-slide-up">
+                <span className="badge bg-info bg-opacity-10 border border-info rounded-pill px-3 py-1">
+                  Hello, I'm
+                </span>
+              </h5>
+              <h1 className="fw-bold display-4 mb-3 animate-slide-up" style={{ animationDelay: '0.2s' }}>
+                {userData.name}
+                <span className="text-info animate-blink">_</span>
+              </h1>
+              <h2 className="text-info mb-4 animate-slide-up" style={{ animationDelay: '0.4s' }}>
+                <i className="bi bi-code-slash me-2"></i>
+                {userData.title}
+              </h2>
+              <p className="lead mb-4 text-light animate-slide-up" style={{ animationDelay: '0.6s' }}>
+                {description || "No description available."}
               </p>
-              <div className="d-flex flex-wrap gap-3 justify-content-center justify-content-lg-start">
-                <a href="/project" className="btn btn-info btn-lg px-4">
-                  <i className="bi bi-code-slash me-2"></i>View Projects
+
+              {/* Enhanced Buttons */}
+              <div className="d-flex gap-3 mt-4 animate-slide-up" style={{ animationDelay: '0.8s' }}>
+                <a href="#contact" className="btn btn-info btn-lg px-4">
+                  <i className="bi bi-chat-dots me-2"></i>Get In Touch
                 </a>
-                <a href="#contact" className="btn btn-outline-info btn-lg px-4">
-                  <i className="bi bi-envelope me-2"></i>Contact Me
+                <a href="#projects" className="btn btn-outline-info btn-lg px-4">
+                  <i className="bi bi-briefcase me-2"></i>View Projects
+                </a>
+              </div>
+
+              {/* Social Links */}
+              <div className="mt-4 d-flex gap-3 animate-slide-up" style={{ animationDelay: '1s' }}>
+                <a href={userData.linkedin} target="_blank" rel="noopener noreferrer" className="text-info fs-5">
+                  <i className="bi bi-linkedin"></i>
+                </a>
+                <a href={`mailto:${userData.email}`} className="text-info fs-5">
+                  <i className="bi bi-envelope"></i>
+                </a>
+                <a href={`tel:${userData.phone}`} className="text-info fs-5">
+                  <i className="bi bi-telephone"></i>
+                </a>
+                <a href='https://github.com/Dileep-krishna' className="text-info fs-5">
+                  <i className="bi bi-github"></i>
                 </a>
               </div>
             </div>
 
             {/* Right Image */}
             <div className="col-lg-6 text-center">
-              <div className="position-relative d-inline-block">
+              <div className="position-relative d-inline-block animate-scale">
+                <div className="position-absolute top-0 start-0 w-100 h-100 rounded-circle border border-info border-3 animate-pulse"></div>
                 <img
-                  src=""
+                  src={profileImage || "https://cdn-icons-png.flaticon.com/512/149/149071.png"}
                   alt="Profile"
-                  className="img-fluid rounded-circle shadow-lg"
-                  style={{ 
+                  className="img-fluid rounded-circle shadow-lg position-relative"
+                  style={{
                     width: '350px',
                     height: '350px',
                     objectFit: 'cover',
-                    border: '5px solid #0dcaf0'
+                    border: '5px solid #0dcaf0',
+                    boxShadow: '0 0 30px rgba(13, 202, 240, 0.3)'
                   }}
                 />
-                <div className="position-absolute bottom-0 end-0 bg-info rounded-circle p-2 border border-3 border-dark">
-                  <i className="bi bi-check-circle-fill text-dark fs-4"></i>
-                </div>
               </div>
             </div>
           </div>
-          
+
           {/* Scroll indicator */}
-          <div className="text-center mt-5">
+          <div className="text-center mt-5 animate-bounce">
             <a href="#about" className="text-info text-decoration-none">
-              <i className="bi bi-chevron-down fs-4"></i>
+              <i className="bi bi-chevron-down fs-2"></i>
             </a>
           </div>
         </div>
       </section>
 
       {/* About Section */}
-<section
-  id="about"
-  className="container-fluid d-flex align-items-center min-vh-0"
-  style={{
-    backgroundImage:
-      "linear-gradient(rgba(14, 13, 13, 0.75), rgba(0,0,0,0.75)), url(https://wallpapers.com/images/high/gray-best-laptop-beside-iphone-aav9zfw3u9lzah0n.webp)",
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    backgroundAttachment: "fixed"
-  }}
->
-  <div className="container py-5">
-    <div className="row align-items-center">
-
-      {/* About Text */}
-      <div className="col-lg-6 mb-5 mb-lg-0">
-        <h5 className="text-info mb-2">Who Am I?</h5>
-        <h2 className="fw-bold display-5 text-light mb-4">
-          About <span className="text-info">Me</span>
-        </h2>
-
-        <p className="lead text-light mb-4">
-          {userData.description}
-        </p>
-
-        <p className="text-light">
-          I specialize in building modern full-stack web applications using{" "}
-          <strong className="text-info">
-            React, Node.js, Express, and MongoDB
-          </strong>.
-          I enjoy turning complex problems into simple, elegant solutions.
-        </p>
-
-        <a href="#contact" className="btn btn-info btn-lg mt-3">
-          <i className="bi bi-chat-dots me-2"></i>Let's Connect
-        </a>
-      </div>
-
-      {/* Personal Info Card */}
-      <div className="col-lg-6">
-        <div className=" border border-info border-opacity-25 rounded-4 p-4 ">
-          <h5 className="fw-bold mb-4 text-info">
-            <i className="bi bi-person-badge me-2"></i>Personal Info
-          </h5>
-
-          <div className="row g-3">
-            {[
-              { label: "Name", value: userData.name, icon: "bi-person" },
-              { label: "Education", value: userData.degree, icon: "bi-mortarboard" },
-              { label: "Role", value: userData.title, icon: "bi-briefcase" },
-              { label: "Location", value: userData.location, icon: "bi-geo-alt" }
-            ].map((item, index) => (
-              <div className="col-6" key={index}>
-                <div className="p-3 rounded-3 border border-info border-opacity-25">
-                  <i className={`bi ${item.icon} text-info fs-5`}></i>
-                  <h6 className="text-light mt-2 mb-1">{item.label}</h6>
-                  <p className="text-light opacity-75 mb-0">{item.value}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-        </div>
-      </div>
-
-    </div>
-  </div>
-</section>
-
-
-
-      {/* Skills Section */}
-      <section  className="container-fluid d-flex align-items-center min-vh-0"
-  style={{
-    backgroundImage:
-      "linear-gradient(rgba(14, 13, 13, 0.75), rgba(0,0,0,0.75)), url(https://wallpapers.com/images/high/gray-best-laptop-beside-iphone-aav9zfw3u9lzah0n.webp)",
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    backgroundAttachment: "fixed"
-  }} id="skills ">
+      <section
+        id="about"
+        className="container-fluid py-5"
+        style={{
+          backgroundImage: "linear-gradient(rgba(0,0,0,0.9), rgba(0,0,0,0.95)), url(https://wallpapers.com/images/high/gray-best-laptop-beside-iphone-aav9zfw3u9lzah0n.webp)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundAttachment: "fixed"
+        }}
+      >
         <div className="container py-5">
-          <h2 className="text-center fw-bold mb-5">
-            <i className="bi bi-tools text-info me-2"></i>
-            My Skills
-          </h2>
+          <div className="row align-items-center">
+            {/* About Text */}
+            <div className="col-lg-6 mb-5 mb-lg-0">
+              <h5 className="text-info mb-2">
+                <i className="bi bi-person-circle me-2"></i>
+                Who Am I?
+              </h5>
+              <h2 className="fw-bold display-5 text-light mb-4">
+                About <span className="text-info">Me</span>
+              </h2>
 
-          <div className="row g-4">
-            {/* Frontend */}
-            <div className="col-md-4">
-              <div  style={{
-    backgroundImage:
-      "linear-gradient(rgba(14, 13, 13, 0.75), rgba(0,0,0,0.75)), url(https://wallpapers.com/images/high/gray-best-laptop-beside-iphone-aav9zfw3u9lzah0n.webp)",
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    backgroundAttachment: "fixed"
-  }} className="card border-info h-100 shadow">
-                <div className="card-body">
-                  <h5 className="fw-bold mb-4 text-info">
-                    <i className="bi bi-display me-2"></i>
-                    Frontend
-                  </h5>
-                  {skills.frontend.map((skill, index) => (
-                    <div key={index} className="mb-3">
-                      <div className="d-flex justify-content-between mb-1">
-                        <span className="text-light">{skill.name}</span>
-                        <span className="text-info">{skill.level}%</span>
-                      </div>
-                      <div className="progress" style={{ height: '8px' }}>
-                        <div 
-                          className="progress-bar bg-info" 
-                          style={{ width: `${skill.level}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+              <div className="card bg-dark bg-opacity-50 border border-info border-opacity-25 rounded-4 p-4 mb-4 shadow-lg">
+                <p className="lead text-light mb-0">
+                  <i className="bi bi-quote text-info fs-4 me-2"></i>
+                  {userData.description}
+                </p>
               </div>
+
+              <p className="text-light mb-4">
+                I specialize in building modern full-stack web applications using{" "}
+                <span className="text-info fw-bold">React, Node.js, Express, Angular and MongoDB</span>.
+                I enjoy turning complex problems into simple, elegant solutions.
+              </p>
+
+              {/* Tech Stack */}
+              <div className="d-flex flex-wrap gap-2 mb-4">
+                {['React', 'Node.js', 'Express', 'MongoDB', 'JavaScript', 'Bootstrap', 'Angular'].map((tech, index) => (
+                  <span key={index} className="badge bg-info bg-opacity-10 border border-info text-info px-3 py-2">
+                    <i className="bi bi-check-circle me-2"></i>
+                    {tech}
+                  </span>
+                ))}
+              </div>
+
+              <a href="#contact" className="btn btn-info btn-lg mt-3 shadow">
+                <i className="bi bi-chat-dots me-2"></i>Let's Connect
+              </a>
             </div>
 
-            {/* Backend */}
-            <div className="col-md-4">
-              <div  style={{
-    backgroundImage:
-      "linear-gradient(rgba(14, 13, 13, 0.75), rgba(0,0,0,0.75)), url(https://wallpapers.com/images/high/gray-best-laptop-beside-iphone-aav9zfw3u9lzah0n.webp)",
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    backgroundAttachment: "fixed"
-  }} className="card  border-info h-100 shadow">
-                <div className="card-body">
-                  <h5 className="fw-bold mb-4 text-info">
-                    <i className="bi bi-server me-2"></i>
-                    Backend
+            {/* Personal Info Card */}
+            <div className="col-lg-6">
+              <div className="card bg-dark bg-opacity-50 border border-info border-opacity-25 rounded-4 p-4 shadow-lg hover-lift">
+                <div className="card-header bg-transparent border-bottom border-info border-opacity-25 pb-3 mb-3">
+                  <h5 className="fw-bold mb-0 text-info">
+                    <i className="bi bi-person-badge me-2"></i>Personal Info
                   </h5>
-                  {skills.backend.map((skill, index) => (
-                    <div key={index} className="mb-3">
-                      <div className="d-flex justify-content-between mb-1">
-                        <span className="text-light">{skill.name}</span>
-                        <span className="text-info">{skill.level}%</span>
-                      </div>
-                      <div className="progress" style={{ height: '8px' }}>
-                        <div 
-                          className="progress-bar bg-info" 
-                          style={{ width: `${skill.level}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                  ))}
                 </div>
-              </div>
-            </div>
 
-            {/* Tools */}
-            <div className="col-md-4">
-              <div  style={{
-    backgroundImage:
-      "linear-gradient(rgba(14, 13, 13, 0.75), rgba(0,0,0,0.75)), url(https://wallpapers.com/images/high/gray-best-laptop-beside-iphone-aav9zfw3u9lzah0n.webp)",
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    backgroundAttachment: "fixed"
-  }} className="card  border-info h-100 shadow">
-                <div className="card-body">
-                  <h5 className="fw-bold mb-4 text-info">
-                    <i className="bi bi-wrench me-2"></i>
-                    Tools & Platforms
-                  </h5>
-                  {skills.tools.map((skill, index) => (
-                    <div key={index} className="mb-3">
-                      <div className="d-flex justify-content-between mb-1">
-                        <span className="text-light">{skill.name}</span>
-                        <span className="text-info">{skill.level}%</span>
-                      </div>
-                      <div className="progress" style={{ height: '8px' }}>
-                        <div 
-                          className="progress-bar bg-info" 
-                          style={{ width: `${skill.level}%` }}
-                        ></div>
+                <div className="row g-3">
+                  {[
+                    { label: "Name", value: userData.name, icon: "bi-person-fill", color: "text-info" },
+                    { label: "Education", value: userData.degree, icon: "bi-mortarboard-fill", color: "text-info" },
+                    { label: "Role", value: userData.title, icon: "bi-briefcase-fill", color: "text-info" },
+                    { label: "Location", value: userData.location, icon: "bi-geo-alt-fill", color: "text-info" },
+                    { label: "Email", value: userData.email, icon: "bi-envelope-fill", color: "text-info" },
+                    { label: "Phone", value: userData.phone, icon: "bi-telephone-fill", color: "text-info" }
+                  ].map((item, index) => (
+                    <div className="col-6" key={index}>
+                      <div className="p-3 rounded-3 border border-info border-opacity-25 bg-dark bg-opacity-25 hover-glow">
+                        <div className="d-flex align-items-center">
+                          <div className={`${item.color} me-3`}>
+                            <i className={`bi ${item.icon} fs-4`}></i>
+                          </div>
+                          <div>
+                            <h6 className="text-light mb-1 small">{item.label}</h6>
+                            <p className="text-light opacity-75 mb-0 small">{item.value}</p>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -312,93 +297,447 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Contact Section */}
-      <section  style={{
-    backgroundImage:
-      "linear-gradient(rgba(14, 13, 13, 0.75), rgba(0,0,0,0.75)), url(https://wallpapers.com/images/high/gray-best-laptop-beside-iphone-aav9zfw3u9lzah0n.webp)",
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    backgroundAttachment: "fixed"
-  }} id="contact" className="py-5">
+      {/* Skills Section */}
+      <section className="container-fluid py-5"
+        style={{
+          backgroundImage: "linear-gradient(rgba(0,0,0,0.9), rgba(0,0,0,0.95)), url(https://wallpapers.com/images/high/gray-best-laptop-beside-iphone-aav9zfw3u9lzah0n.webp)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundAttachment: "fixed"
+        }}
+        id="skills"
+      >
         <div className="container py-5">
-          <h2 className="text-center fw-bold mb-5">
-            <i className="bi bi-envelope text-info me-2"></i>
-            Contact Me
-          </h2>
+          <div className="text-center mb-5">
+            <h5 className="text-info mb-2">
+              <i className="bi bi-stars me-2"></i>
+              My Expertise
+            </h5>
+            <h2 className="fw-bold display-5 text-light mb-3">
+              Technical <span className="text-info">Skills</span>
+            </h2>
+            <p className="text-light opacity-75">Technologies I work with and my proficiency levels</p>
+          </div>
 
-          <div className="row justify-content-center">
-            <div className="col-lg-8">
-              <div  style={{
-    backgroundImage:
-      "linear-gradient(rgba(14, 13, 13, 0.75), rgba(0,0,0,0.75)), url(https://wallpapers.com/images/high/gray-best-laptop-beside-iphone-aav9zfw3u9lzah0n.webp)",
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    backgroundAttachment: "fixed"
-  }} className="card  border-info shadow">
-                <div className="card-body">
-                  <div className="row g-4">
-                    <div className="col-md-6">
-                      <div className="d-flex align-items-center mb-4">
-                        <div className="bg-info rounded-circle p-3 me-3">
-                          <i className="bi bi-envelope-fill text-dark fs-4"></i>
-                        </div>
-                        <div>
-                          <h6 className="text-light mb-1">Email</h6>
-                          <a href={`mailto:${userData.email}`} className="text-info text-decoration-none">
-                            {userData.email}
-                          </a>
-                        </div>
+          <div className="row g-4">
+            {[
+              {
+                title: "Frontend Development",
+                skills: skills.frontend,
+                icon: "bi-display",
+                color: "primary",
+                delay: "0s"
+              },
+              {
+                title: "Backend Development",
+                skills: skills.backend,
+                icon: "bi-server",
+                color: "info",
+                delay: "0.1s"
+              },
+              {
+                title: "Tools & Platforms",
+                skills: skills.tools,
+                icon: "bi-wrench",
+                color: "success",
+                delay: "0.2s"
+              }
+            ].map((category, catIndex) => (
+              <div className="col-md-4" key={catIndex}>
+                <div
+                  className="card bg-dark bg-opacity-50 border border-info border-opacity-25 h-100 shadow-lg hover-lift"
+                  style={{ animationDelay: category.delay }}
+                >
+                  <div className="card-header bg-transparent border-bottom border-info border-opacity-25 pb-3">
+                    <div className="d-flex align-items-center">
+                      <div className={`bg-${category.color} bg-opacity-10 rounded-circle p-3 me-3`}>
+                        <i className={`bi ${category.icon} text-${category.color} fs-4`}></i>
                       </div>
+                      <h5 className="fw-bold mb-0 text-light">
+                        {category.title}
+                      </h5>
                     </div>
+                  </div>
 
-                    <div className="col-md-6">
-                      <div className="d-flex align-items-center mb-4">
-                        <div className="bg-info rounded-circle p-3 me-3">
-                          <i className="bi bi-phone-fill text-dark fs-4"></i>
-                        </div>
-                        <div>
-                          <h6 className="text-light mb-1">Phone</h6>
-                          <a href={`tel:${userData.phone}`} className="text-info text-decoration-none">
-                            {userData.phone}
-                          </a>
-                        </div>
+                  <div className="card-body">
+                    {category.skills.length === 0 ? (
+                      <div className="text-center py-4">
+                        <i className="bi bi-tools text-info fs-1 mb-3"></i>
+                        <p className="text-light">No skills added yet.</p>
                       </div>
-                    </div>
+                    ) : (
+                      category.skills.map((skill, skillIndex) => (
+                        <div key={skill._id || skillIndex} className="mb-4">
+                          <div className="d-flex justify-content-between align-items-center mb-2">
+                            <div className="d-flex align-items-center">
+                              <div className={`bg-${category.color} bg-opacity-10 rounded-circle p-2 me-2`}>
+                                <i className={`bi bi-code-slash text-${category.color}`}></i>
+                              </div>
+                              <span className="text-light fw-semibold">{skill.name}</span>
+                            </div>
+                            <span className={`badge bg-${category.color} px-3 py-1`}>{skill.level}%</span>
+                          </div>
+                          <div className="progress" style={{ height: '10px', borderRadius: '5px' }}>
+                            <div
+                              className={`progress-bar bg-${category.color}`}
+                              style={{
+                                width: `${skill.level}%`,
+                                borderRadius: '5px'
+                              }}
+                            ></div>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
 
-                    <div className="col-md-6">
-                      <div className="d-flex align-items-center mb-4">
-                        <div className="bg-info rounded-circle p-3 me-3">
-                          <i className="bi bi-geo-alt-fill text-dark fs-4"></i>
+                  <div className="card-footer bg-transparent border-top border-info border-opacity-25 pt-3">
+                    <small className="text-info opacity-75">
+                      <i className="bi bi-info-circle me-1"></i>
+                      {category.skills.length} skills listed
+                    </small>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Skill Summary */}
+          <div className="row mt-5 pt-4 border-top border-info border-opacity-25">
+            <div className="col-12">
+              <div className="card bg-dark bg-opacity-50 border border-info border-opacity-25 rounded-4 p-4">
+                <div className="row align-items-center">
+                  <div className="col-md-8">
+                    <h5 className="text-light mb-2">Ready to take your project to the next level?</h5>
+                    <p className="text-light opacity-75 mb-0">
+                      Let's work together to build something amazing with these technologies.
+                    </p>
+                  </div>
+                  <div className="col-md-4 text-md-end mt-3 mt-md-0">
+                    <a href="#contact" className="btn btn-info btn-lg">
+                      <i className="bi bi-lightning-charge me-2"></i>
+                      Start Project
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Projects Section - Trending Reels Style */}
+      {/* Projects Section - Updated to match your card structure */}
+      <section
+        id="projects"
+        className="container-fluid py-5"
+        style={{
+          backgroundImage: "linear-gradient(rgba(0,0,0,0.9), rgba(0,0,0,0.95)), url(https://wallpapers.com/images/high/gray-best-laptop-beside-iphone-aav9zfw3u9lzah0n.webp)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundAttachment: "fixed"
+        }}
+      >
+        <div className="container py-5">
+          <div className="text-center mb-5">
+            <h5 className="text-info mb-2">
+              <i className="bi bi-fire me-2"></i>
+              Trending Now
+            </h5>
+            <h2 className="fw-bold display-5 text-light mb-3">
+              Featured <span className="text-info">Projects</span>
+            </h2>
+            <p className="text-light opacity-75">Explore my latest work with reels-like experience</p>
+          </div>
+
+          {projectLoading ? (
+            <div className="text-center py-5">
+              <div className="spinner-border text-info" role="status">
+                <span className="visually-hidden">Loading projects...</span>
+              </div>
+              <p className="text-info mt-3">Loading awesome projects...</p>
+            </div>
+          ) : projects.length === 0 ? (
+            <div className="text-center py-5">
+              <i className="bi bi-folder2-open text-info fs-1 mb-3"></i>
+              <h5 className="text-light">No projects found</h5>
+              <p className="text-light opacity-75">Check back soon for amazing projects!</p>
+            </div>
+          ) : (
+            <>
+              {/* Projects Grid */}
+              <div className="row g-4 justify-content-center">
+                {projects.map((project, index) => (
+                  <div className="col-lg-4 col-md-6" key={project._id || project.id || index}>
+                    <div className="card bg-dark bg-opacity-75 border border-info border-opacity-25 rounded-4 shadow-lg overflow-hidden h-100 hover-lift">
+                      {/* Project Header */}
+                      <div className="position-relative">
+                        {/* Project Image */}
+                        <div className="project-image-container" style={{ height: '200px', overflow: 'hidden' }}>
+                          {project.image ? (
+                            <img
+                              src={`http://localhost:4000/imguploads/${project.image}`}
+                              alt={project.title}
+                              className="img-fluid w-100 h-100"
+                              style={{
+                                objectFit: 'cover',
+                                transition: 'transform 0.5s ease'
+                              }}
+                            />
+                          ) : (
+                            <div className="w-100 h-100 bg-info bg-opacity-10 d-flex align-items-center justify-content-center">
+                              <i className="bi bi-laptop text-info fs-1"></i>
+                            </div>
+                          )}
                         </div>
-                        <div>
-                          <h6 className="text-light mb-1">Location</h6>
-                          <span className="text-info">{userData.location}</span>
-                        </div>
+
+
+
+
+
                       </div>
-                    </div>
 
-                    <div className="col-md-6">
-                      <div className="d-flex align-items-center mb-4">
-                        <div className="bg-info rounded-circle p-3 me-3">
-                          <i className="bi bi-linkedin text-dark fs-4"></i>
+                      {/* Project Content */}
+                      <div className="card-body p-4 d-flex flex-column">
+                        <div className="d-flex justify-content-between align-items-start mb-3">
+                          <h5 className="text-light fw-bold mb-0">
+                            {project.title}
+                            <span className="text-info blink-effect">_</span>
+                          </h5>
+                          <div className="d-flex gap-2">
+                            {project.live && project.live !== '#' && (
+                              <i className="bi bi-rocket-takeoff text-success fs-5 float-effect"></i>
+                            )}
+                            {project.github && project.github !== '#' && (
+                              <i className="bi bi-github text-light fs-5"></i>
+                            )}
+                          </div>
                         </div>
-                        <div>
-                          <h6 className="text-light mb-1">LinkedIn</h6>
-                          <a 
-                            href={userData.linkedin} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="text-info text-decoration-none"
+
+                        <p className="text-light opacity-75 mb-4 flex-grow-1" style={{ fontSize: '0.9rem' }}>
+                          {project.description && project.description.length > 120
+                            ? `${project.description.substring(0, 120)}...`
+                            : project.description || 'A fantastic project showcasing modern web development skills.'}
+                        </p>
+
+                        {/* Technologies Used */}
+                        {project.technologies && project.technologies.length > 0 && (
+                          <div className="mb-4">
+                            <h6 className="text-info mb-2">
+                              <i className="bi bi-tags me-1"></i>
+                              Technologies
+                            </h6>
+                            <div className="d-flex flex-wrap gap-2">
+                              {project.technologies.slice(0, 3).map((tech, techIndex) => (
+                                <span
+                                  key={techIndex}
+                                  className="badge bg-info bg-opacity-10 border border-info border-opacity-25 text-info px-2 py-1 glow-effect"
+                                >
+                                  {tech}
+                                </span>
+                              ))}
+                              {project.technologies.length > 3 && (
+                                <span className="badge bg-dark border border-info border-opacity-25 text-info px-2 py-1 glow-effect">
+                                  +{project.technologies.length - 3} more
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+
+
+                        {/* Action Buttons */}
+                        <div className="d-flex gap-2 mt-3 pt-3 border-top border-light border-opacity-25">
+                          {/* Code Button */}
+                          <button
+                            className="btn btn-outline-info btn-sm flex-fill hover-scale"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (project.github && project.github !== '#') {
+                                window.open(project.github, '_blank');
+                              }
+                            }}
+                            disabled={!project.github || project.github === '#'}
                           >
-                            View Profile
-                          </a>
+                            <i className="bi bi-github me-1"></i>
+                            Code
+                          </button>
+
+                          {/* Live Button */}
+                          <button
+                            className="btn btn-sm flex-fill hover-scale"
+                            style={{
+                              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                              border: 'none',
+                              color: 'white',
+                              position: 'relative',
+                              overflow: 'hidden'
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (project.live && project.live !== '#') {
+                                window.open(project.live, '_blank');
+                              }
+                            }}
+                            disabled={!project.live || project.live === '#'}
+                          >
+                            <span className="position-relative z-1">
+                              <i className="bi bi-rocket-takeoff me-1 rocket-effect"></i>
+                              Live....
+                            </span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Project Footer */}
+                      <div className="card-footer bg-transparent border-top border-info border-opacity-25 py-3">
+                        <div className="d-flex justify-content-between align-items-center">
+                          <div className="d-flex align-items-center">
+                            <div className="rounded-circle bg-info bg-opacity-10 p-1 me-2 pulse-effect">
+                              <i className="bi bi-person-circle text-info"></i>
+                            </div>
+                            <small className="text-light">
+                              By {userData.name}
+                            </small>
+                          </div>
+                          <small className="text-info">
+                            <i className="bi bi-clock me-1"></i>
+                            {project.date || 'Recent'}
+                          </small>
                         </div>
                       </div>
                     </div>
                   </div>
+                ))}
+              </div>
 
-                  {/* Optional: Add a contact form here */}
-              
+              {/* View All Projects Button */}
+              <div className="text-center mt-5">
+                <a href="/project" className="btn btn-outline-info btn-lg px-5 hover-scale bounce-effect">
+                  <i className="bi bi-grid-3x3-gap me-2"></i>
+                  View All Projects
+                </a>
+              </div>
+            </>
+          )}
+        </div>
+      </section>
+      {/* Contact Section */}
+      <section
+        id="contact"
+        className="py-5"
+        style={{
+          backgroundImage: "linear-gradient(rgba(0,0,0,0.9), rgba(0,0,0,0.95)), url(https://wallpapers.com/images/high/gray-best-laptop-beside-iphone-aav9zfw3u9lzah0n.webp)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundAttachment: "fixed"
+        }}
+      >
+        <div className="container py-5">
+          <div className="text-center mb-5">
+            <h5 className="text-info mb-2">
+              <i className="bi bi-chat-left-dots me-2"></i>
+              Get In Touch
+            </h5>
+            <h2 className="fw-bold display-5 text-light mb-3">
+              Contact <span className="text-info">Me</span>
+            </h2>
+            <p className="text-light opacity-75">Feel free to reach out for collaborations or just a friendly hello</p>
+          </div>
+
+          <div className="row justify-content-center">
+            <div className="col-lg-10">
+              <div className="card bg-dark bg-opacity-50 border border-info border-opacity-25 rounded-4 shadow-lg overflow-hidden">
+                <div className="row g-0">
+                  {/* Contact Info Sidebar */}
+                  <div className="col-lg-5 bg-dark bg-opacity-75 p-4">
+                    <h4 className="text-light fw-bold mb-4">
+                      <i className="bi bi-info-circle me-2"></i>
+                      Contact Information
+                    </h4>
+
+                    {[
+                      {
+                        icon: "bi-envelope-fill",
+                        title: "Email",
+                        value: userData.email,
+                        link: `mailto:${userData.email}`,
+                        color: "info"
+                      },
+                      {
+                        icon: "bi-telephone-fill",
+                        title: "Phone",
+                        value: userData.phone,
+                        link: `tel:${userData.phone}`,
+                        color: "info"
+                      },
+                      {
+                        icon: "bi-geo-alt-fill",
+                        title: "Location",
+                        value: userData.location,
+                        color: "info"
+                      },
+                      {
+                        icon: "bi-linkedin",
+                        title: "LinkedIn",
+                        value: "View Profile",
+                        link: userData.linkedin,
+                        color: "info"
+                      }
+                    ].map((item, index) => (
+                      <div key={index} className="d-flex align-items-center mb-4 p-3 rounded-3 bg-dark bg-opacity-50 border border-info border-opacity-25 hover-glow">
+                        <div className={`bg-${item.color} bg-opacity-10 rounded-circle p-3 me-3`}>
+                          <i className={`bi ${item.icon} text-${item.color} fs-4`}></i>
+                        </div>
+                        <div>
+                          <h6 className="text-light mb-1 small">{item.title}</h6>
+                          {item.link ? (
+                            <a href={item.link} target="_blank" rel="noopener noreferrer"
+                              className={`text-${item.color} text-decoration-none`}>
+                              {item.value}
+                            </a>
+                          ) : (
+                            <span className={`text-${item.color}`}>{item.value}</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+
+                    {/* Business Hours */}
+
+                  </div>
+
+                  {/* Contact Form */}
+                  <div className="col-lg-7 p-4">
+                    <h4 className="text-light fw-bold mb-4">
+                      <i className="bi bi-send me-2"></i>
+                      Send a Message
+                    </h4>
+
+                    <form>
+                      <div className="row g-3">
+
+
+
+
+                        <div className="col-12">
+
+                        </div>
+                      </div>
+                    </form>
+
+                    {/* Quick Response Note */}
+                    <div className="mt-4 p-3 rounded-3 bg-dark bg-opacity-25 border border-info border-opacity-25">
+                      <div className="d-flex align-items-center">
+                        <i className="bi bi-lightning text-info fs-4 me-3"></i>
+                        <div>
+                          <h6 className="text-light mb-1">Quick Response Guaranteed</h6>
+                          <p className="text-info small mb-0">I typically respond within 24 hours</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -407,18 +746,372 @@ const Home = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-black text-center py-4 border-top border-info">
+      <footer className="bg-black text-center py-5 border-top border-info">
         <div className="container">
-          <p className="text-light mb-0">
-            © {new Date().getFullYear()} {userData.name}. All rights reserved.
-          </p>
-          <div className="mt-3">
-            <a href="#home" className="text-info text-decoration-none mx-3">
-              <i className="bi bi-arrow-up-circle fs-4"></i>
-            </a>
+          <div className="row align-items-center">
+            <div className="col-lg-4 text-lg-start mb-3 mb-lg-0">
+              <h5 className="text-light mb-2">
+                <i className="bi bi-person-circle me-2 text-info"></i>
+                {userData.name}
+              </h5>
+              <p className="text-info small mb-0">
+                <i className="bi bi-code-slash me-1"></i>
+                {userData.title}
+              </p>
+            </div>
+
+            <div className="col-lg-4 mb-3 mb-lg-0">
+              <div className="d-flex justify-content-center gap-4">
+                {/* Define actual social media links */}
+                {[
+                  {
+                    platform: 'linkedin',
+                    url: userData.linkedin || '#',
+                    icon: 'bi-linkedin'
+                  },
+                  {
+                    platform: 'github',
+                    url: 'https://github.com/Dileep-krishna',
+                    icon: 'bi-github'
+                  },
+                  {
+                    platform: 'instagram',
+                    url: '#',
+                    icon: 'bi-instagram'
+                  }
+                ].map((social, index) => (
+                  <a
+                    key={index}
+                    href={social.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-info fs-5 border border-info border-opacity-25 rounded-circle p-2 hover-lift d-flex align-items-center justify-content-center"
+                    style={{
+                      width: '45px',
+                      height: '45px',
+                      transition: 'all 0.3s ease'
+                    }}
+                    title={social.platform.charAt(0).toUpperCase() + social.platform.slice(1)}
+                  >
+                    <i className={social.icon}></i>
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            <div className="col-lg-4 text-lg-end">
+              <a
+                href="#home"
+                className="btn btn-outline-info d-inline-flex align-items-center"
+                onClick={(e) => {
+                  e.preventDefault();
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+              >
+                <i className="bi bi-arrow-up-circle me-2"></i>
+                Back to Top
+              </a>
+            </div>
+          </div>
+
+          <div className="border-top border-info border-opacity-25 mt-4 pt-4">
+            <p className="text-light mb-0">
+              <i className="bi bi-c-circle me-1 text-info"></i>
+              © {new Date().getFullYear()} {userData.name}. All rights reserved. |
+              Made with <i className="bi bi-heart-fill text-danger mx-1"></i> and React
+              <i className="bi bi-react text-info ms-2"></i>
+            </p>
           </div>
         </div>
       </footer>
+
+      {/* Custom CSS for animations */}
+      <style jsx>{`
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-20px); }
+        }
+        
+        @keyframes float-delayed {
+          0%, 100% { transform: translateY(0px) translateX(0px); }
+          50% { transform: translateY(20px) translateX(-20px); }
+        }
+        
+        @keyframes slide-up {
+          from { transform: translateY(20px); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
+        }
+        
+        @keyframes scale-in {
+          from { transform: scale(0.9); opacity: 0; }
+          to { transform: scale(1); opacity: 1; }
+        }
+        
+        @keyframes blink {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0; }
+        }
+        
+        @keyframes pulse {
+          0%, 100% { transform: scale(1); opacity: 0.5; }
+          50% { transform: scale(1.05); opacity: 0.8; }
+        }
+        
+        @keyframes bounce {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes reel-scroll {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(calc(-100% - 1rem)); }
+        }
+        
+        .animate-float {
+          animation: float 6s ease-in-out infinite;
+        }
+        
+        .animate-float-delayed {
+          animation: float-delayed 8s ease-in-out infinite;
+          animation-delay: 2s;
+        }
+        
+        .animate-slide-up {
+          animation: slide-up 0.6s ease-out forwards;
+          opacity: 0;
+        }
+        
+        .animate-scale {
+          animation: scale-in 0.8s ease-out forwards;
+        }
+        
+        .animate-blink {
+          animation: blink 1s infinite;
+        }
+        
+        .animate-pulse {
+          animation: pulse 2s infinite;
+        }
+        
+        .animate-bounce {
+          animation: bounce 2s infinite;
+        }
+        
+        .hover-lift {
+          transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .hover-lift:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 10px 30px rgba(13, 202, 240, 0.2) !important;
+        }
+        
+        .hover-glow {
+          transition: all 0.3s ease;
+        }
+        
+        .hover-glow:hover {
+          border-color: rgba(13, 202, 240, 0.5) !important;
+          box-shadow: 0 0 15px rgba(13, 202, 240, 0.2);
+        }
+        
+        .card {
+          transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+          transform: translateY(-5px);
+        }
+        
+        .progress-bar {
+          transition: width 1.5s ease-in-out;
+        }
+        
+        /* Reel Card Specific Styles */
+        .project-reel-card {
+          perspective: 1000px;
+        }
+        
+        .project-reel-card .card {
+          transform-style: preserve-3d;
+          transition: transform 0.5s ease;
+        }
+        
+        .project-reel-card:hover .card {
+          transform: rotateY(5deg) rotateX(5deg) translateY(-10px);
+        }
+        
+        .project-image-container {
+          position: relative;
+          overflow: hidden;
+        }
+        
+        .project-image-container::after {
+          content: '';
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          height: 50%;
+          background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+        }
+        
+        /* Reels-like horizontal scroll (optional) */
+        @media (min-width: 768px) {
+          .reels-container {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            padding: 1rem 0;
+            gap: 1rem;
+            scrollbar-width: thin;
+            scrollbar-color: #0dcaf0 transparent;
+          }
+          
+          .reels-container::-webkit-scrollbar {
+            height: 6px;
+          }
+          
+          .reels-container::-webkit-scrollbar-track {
+            background: transparent;
+          }
+          
+          .reels-container::-webkit-scrollbar-thumb {
+            background-color: #0dcaf0;
+            border-radius: 3px;
+          }
+          
+          .reels-container > div {
+            flex: 0 0 auto;
+            width: 350px;
+            scroll-snap-align: start;
+          }
+        }
+          /* Add to your existing style block */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes fire {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 5px rgba(13, 202, 240, 0.5); }
+  50% { box-shadow: 0 0 15px rgba(13, 202, 240, 0.8); }
+}
+
+@keyframes star {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(15deg); }
+  75% { transform: rotate(-15deg); }
+}
+
+@keyframes progress {
+  from { width: 0%; }
+  to { width: attr(data-width); }
+}
+
+@keyframes rocket {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(3px); }
+  75% { transform: translateX(-3px); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes scale {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+/* Animation Classes */
+.pulse-effect {
+  animation: pulse 2s infinite;
+}
+
+.fire-effect {
+  animation: fire 1s infinite;
+}
+
+.blink-effect {
+  animation: blink 1s infinite;
+}
+
+.float-effect {
+  animation: float 3s ease-in-out infinite;
+}
+
+.glow-effect {
+  animation: glow 2s infinite;
+  transition: all 0.3s ease;
+}
+
+.glow-effect:hover {
+  transform: scale(1.05);
+  background-color: rgba(13, 202, 240, 0.2) !important;
+}
+
+.star-effect {
+  animation: star 2s infinite;
+  display: inline-block;
+}
+
+.progress-animate {
+  animation: progress 1.5s ease-out;
+}
+
+.rocket-effect {
+  animation: rocket 1s infinite;
+  display: inline-block;
+}
+
+.bounce-effect {
+  animation: bounce 2s infinite;
+}
+
+.hover-scale {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-scale:hover {
+  transform: scale(1.05);
+  box-shadow: 0 5px 15px rgba(13, 202, 240, 0.3);
+}
+
+.hover-lift {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 15px 30px rgba(13, 202, 240, 0.2);
+}
+
+.project-image-container img {
+  transition: transform 0.5s ease;
+}
+
+.project-image-container:hover img {
+  transform: scale(1.1);
+}
+      `}</style>
     </div>
   );
 };

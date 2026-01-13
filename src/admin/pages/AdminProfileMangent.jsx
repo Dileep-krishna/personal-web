@@ -1,105 +1,158 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import {
+  updateAdminProfileAPI,
+  getAdminProfileAPI,
+} from "../../services/allAPI";
 
 function AdminProfileManagement() {
+  const ADMIN_ID = "695e53041570a0de247b4d89";
+
+  const [showModal, setShowModal] = useState(false);
+  const [serverImage, setServerImage] = useState("");
+
   const [admin, setAdmin] = useState({
-    name: "Admin User",
-    email: "admin@example.com",
-    role: "Administrator",
-    phone: "9876543210",
-    avatar: null,
+    email: "",
+    description: "",
+    profile: null,
   });
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setAdmin({ ...admin, [name]: value });
-  };
+  // 🔥 FETCH PROFILE ON PAGE LOAD (THIS FIXES REFRESH)
+  const fetchAdminProfile = async () => {
+    try {
+      const res = await getAdminProfileAPI(ADMIN_ID);
+      console.log("✅ Admin Profile:", res.data);
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setAdmin({ ...admin, avatar: URL.createObjectURL(file) });
+      setAdmin({
+        email: res.data.email,
+        description: res.data.description,
+        profile: null,
+      });
+
+      if (res.data.profile) {
+        setServerImage(`http://localhost:4000/${res.data.profile}`);
+      }
+    } catch (err) {
+      console.error("❌ Fetch error:", err);
     }
   };
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    fetchAdminProfile();
+  }, []);
+
+  const handleChange = (e) => {
+    setAdmin({ ...admin, [e.target.name]: e.target.value });
+  };
+
+  const handleImageChange = (e) => {
+    setAdmin({ ...admin, profile: e.target.files[0] });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Updated Admin Profile:", admin);
-    alert("Profile updated successfully ✅");
+
+    const formData = new FormData();
+    formData.append("email", admin.email);
+    formData.append("description", admin.description);
+    if (admin.profile) {
+      formData.append("profile", admin.profile);
+    }
+
+    try {
+      const res = await updateAdminProfileAPI(ADMIN_ID, formData);
+      console.log("🎉 Update Response:", res.data);
+
+      if (res.data.admin.profile) {
+        setServerImage(
+          `http://localhost:4000/${res.data.admin.profile}`
+        );
+      }
+
+      setShowModal(false);
+    } catch (err) {
+      console.error("❌ Update error:", err);
+    }
   };
 
   return (
-    <div className="container mt-4">
-      <div className="card shadow-lg p-4 rounded-4">
-        <h3 className="mb-4 text-center">Admin Profile Management</h3>
+    <div className="container mt-5">
+      <div className="card shadow-lg p-4 text-center">
+        <img
+          src={
+            serverImage ||
+            "https://cdn-icons-png.flaticon.com/512/149/149071.png"
+          }
+          alt="Admin"
+          width="120"
+          height="120"
+          className="rounded-circle mx-auto mb-3"
+          onError={(e) =>
+            (e.target.src =
+              "https://cdn-icons-png.flaticon.com/512/149/149071.png")
+          }
+        />
 
-        <div className="text-center mb-3">
-          <img
-            src={
-              admin.avatar ||
-              "https://cdn-icons-png.flaticon.com/512/149/149071.png"
-            }
-            alt="Admin Avatar"
-            className="rounded-circle mb-2"
-            width="120"
-            height="120"
-          />
-          <div>
-            <input type="file" onChange={handleImageChange} />
-          </div>
-        </div>
+        <h5 className="fw-bold">Admin</h5>
+        <p className="text-muted">{admin.description}</p>
 
-        <form onSubmit={handleSubmit}>
-          <div className="mb-3">
-            <label className="form-label">Name</label>
-            <input
-              type="text"
-              className="form-control"
-              name="name"
-              value={admin.name}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div className="mb-3">
-            <label className="form-label">Email</label>
-            <input
-              type="email"
-              className="form-control"
-              name="email"
-              value={admin.email}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div className="mb-3">
-            <label className="form-label">Phone</label>
-            <input
-              type="text"
-              className="form-control"
-              name="phone"
-              value={admin.phone}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div className="mb-3">
-            <label className="form-label">Role</label>
-            <input
-              type="text"
-              className="form-control"
-              value={admin.role}
-              disabled
-            />
-          </div>
-
-          <button type="submit" className="btn btn-primary w-100">
-            Update Profile
-          </button>
-        </form>
+        <button
+          className="btn btn-outline-primary"
+          onClick={() => setShowModal(true)}
+        >
+          Edit Profile
+        </button>
       </div>
+
+      {/* MODAL */}
+      {showModal && (
+        <>
+          <div className="modal fade show d-block">
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content">
+                <form onSubmit={handleSubmit}>
+                  <div className="modal-body">
+                    <input
+                      type="email"
+                      name="email"
+                      className="form-control mb-2"
+                      value={admin.email}
+                      onChange={handleChange}
+                    />
+
+                    <textarea
+                      name="description"
+                      className="form-control mb-2"
+                      value={admin.description}
+                      onChange={handleChange}
+                    />
+
+                    <input
+                      type="file"
+                      className="form-control"
+                      onChange={handleImageChange}
+                    />
+                  </div>
+
+                  <div className="modal-footer">
+                    <button
+                      className="btn btn-secondary"
+                      onClick={() => setShowModal(false)}
+                    >
+                      Cancel
+                    </button>
+                    <button className="btn btn-primary">
+                      Save
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+          <div className="modal-backdrop fade show"></div>
+        </>
+      )}
     </div>
   );
 }
 
 export default AdminProfileManagement;
-
