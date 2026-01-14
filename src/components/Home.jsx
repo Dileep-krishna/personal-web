@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { getAllSkillAPI, getProjectAPI } from "../services/allAPI";
 import axios from "axios";
 import robot from "./robot.png";
-import "./index.css";
+
 const Home = () => {
   const [userData, setUserData] = useState(null);
   const [skills, setSkills] = useState({
@@ -57,30 +57,31 @@ const Home = () => {
     }
   };
 
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 300 && !showRobot) {
-        setShowRobot(true);
-        
-        if (robotTimerRef.current) {
-          clearTimeout(robotTimerRef.current);
-        }
-        
-        robotTimerRef.current = setTimeout(() => {
-          setShowRobot(false);
-        }, 5000);
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
+useEffect(() => {
+  const handleScroll = () => {
+    if (window.scrollY > 300 && !showRobot) {
+      setShowRobot(true);
+      
       if (robotTimerRef.current) {
         clearTimeout(robotTimerRef.current);
       }
-    };
-  }, [showRobot]);
+      
+      // Robot will disappear after 3 seconds
+      robotTimerRef.current = setTimeout(() => {
+        setShowRobot(false);
+      }, 1000); // 3s + 0.8s animation duration
+    }
+  };
+
+  window.addEventListener('scroll', handleScroll);
+  
+  return () => {
+    window.removeEventListener('scroll', handleScroll);
+    if (robotTimerRef.current) {
+      clearTimeout(robotTimerRef.current);
+    }
+  };
+}, [showRobot]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -832,70 +833,80 @@ const Home = () => {
       </footer>
 
 <style jsx>{`
-.robot-container {
-  position: absolute;
-  bottom: 170px;
-  right: end;
-  z-index: 999;
-  text-align: end;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.8s ease, transform 0.8s ease;
-}
-
-.robot-container.visible {
-  opacity: 1;
-  pointer-events: auto;
-  animation: robotPeek 7s cubic-bezier(0.19, 1, 0.22, 1) forwards;
-}
-
-.robot-container.hiding {
-  animation: robotDisappear 0.8s ease-out forwards;
-  pointer-events: none;
-}
-
-@keyframes robotPeek {
-  0% {
-    right: -2000px;
-    opacity: 0;
-  }
-  60% {
-    right: 0px;
-    opacity: 1;
-  }
-  80% {
-    right: -3px;
-  }
-  100% {
-    right: -4px;
-    opacity: 1;
-  }
-}
-
-@keyframes robotDisappear {
-  0% {
-    opacity: 1;
-    transform: translateX(0) scale(1);
-  }
-  100% {
-    opacity: 0;
-    transform: translateX(100px) scale(0.8);
-  }
-}
-
-.robot {
-  width: 340px;
-  animation: robotFloat 2.5s ease-in-out infinite;
-  transform-origin: end;
-  filter: drop-shadow(0 10px 25px rgba(0,188,212,0.4));
-}
-
-@media (max-width: 768px) {
   .robot-container {
-    bottom: -310px;
-    right: 20px;
+    position: absolute;
+    bottom: 170px;
+    right: end;
+    z-index: 999;
+    text-align: end;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.8s ease, transform 0.8s ease;
   }
-}
+
+  .robot-container.visible {
+    opacity: 1;
+    pointer-events: auto;
+    animation: robotPeek 7s cubic-bezier(0.19, 1, 0.22, 1) forwards,
+               robotDisappear 0.8s ease-out 3s forwards; /* Changed 5s to 3s */
+  }
+
+  .robot-container.hiding {
+    animation: robotDisappear 0.8s ease-out forwards;
+    pointer-events: none;
+  }
+
+  @keyframes robotPeek {
+    0% {
+      right: -2000px;
+      opacity: 0;
+    }
+    60% {
+      right: 0px;
+      opacity: 1;
+    }
+    80% {
+      right: -3px;
+    }
+    100% {
+      right: -4px;
+      opacity: 1;
+    }
+  }
+
+  @keyframes robotDisappear {
+    0% {
+      opacity: 1;
+      transform: translateX(0) scale(1);
+    }
+    100% {
+      opacity: 0;
+      transform: translateX(100px) scale(0.8);
+    }
+  }
+
+  .robot {
+    width: 340px;
+    animation: robotFloat 2.5s ease-in-out infinite;
+    transform-origin: end;
+    filter: drop-shadow(0 10px 25px rgba(0,188,212,0.4));
+  }
+
+  @keyframes robotFloat {
+    0%,100% { 
+      transform: translateY(0) rotate(0deg); 
+    }
+    75% { 
+      transform: translateY(-12px) rotate(-2deg); 
+    }
+  }
+
+  @media (max-width: 768px) {
+    .robot-container {
+      bottom: -310px;
+      right: 20px;
+    }
+  }
 
 
 }
