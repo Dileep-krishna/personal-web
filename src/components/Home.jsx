@@ -1,24 +1,25 @@
-import React, { useState, useEffect } from "react";
-import { getAllSkillAPI, getProjectAPI } from "../services/allAPI"; // Make sure getProjectAPI is imported
+import React, { useState, useEffect, useRef } from "react";
+import { getAllSkillAPI, getProjectAPI } from "../services/allAPI";
 import axios from "axios";
-
+import robot from "./robot.png";
+import "./index.css";
 const Home = () => {
-  // State for dynamic data
   const [userData, setUserData] = useState(null);
   const [skills, setSkills] = useState({
     frontend: [],
     backend: [],
     tools: []
   });
-  const [projects, setProjects] = useState([]); // New state for projects
+  const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [projectLoading, setProjectLoading] = useState(true); // Loading state for projects
+  const [projectLoading, setProjectLoading] = useState(true);
   const [profileImage, setProfileImage] = useState("");
   const [description, setDescription] = useState("");
+  const [showRobot, setShowRobot] = useState(false);
+  const robotTimerRef = useRef(null);
 
-  const ADMIN_ID = "695e53041570a0de247b4d89"; 
+  const ADMIN_ID = "695e53041570a0de247b4d89";
 
-  // Fetch skills from backend API
   const fetchSkills = async () => {
     try {
       const response = await getAllSkillAPI();
@@ -40,13 +41,11 @@ const Home = () => {
     }
   };
 
-  // Fetch projects from backend API
   const fetchProjects = async () => {
     try {
       setProjectLoading(true);
       const response = await getProjectAPI();
       if (response && response.data) {
-        // Take first 4-5 projects or all if less than 5
         const projectsData = response.data.slice(0, 5);
         setProjects(projectsData);
       }
@@ -58,12 +57,35 @@ const Home = () => {
     }
   };
 
-  // Fetch user data and skills on component mount
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 300 && !showRobot) {
+        setShowRobot(true);
+        
+        if (robotTimerRef.current) {
+          clearTimeout(robotTimerRef.current);
+        }
+        
+        robotTimerRef.current = setTimeout(() => {
+          setShowRobot(false);
+        }, 5000);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (robotTimerRef.current) {
+        clearTimeout(robotTimerRef.current);
+      }
+    };
+  }, [showRobot]);
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // Fetch admin profile & description
         try {
           const res = await axios.get(`http://localhost:4000/admin/profile/${ADMIN_ID}`);
           const data = res.data;
@@ -73,13 +95,9 @@ const Home = () => {
           console.error("Error fetching admin profile:", error);
         }
 
-        // Fetch skills from API
         await fetchSkills();
-
-        // Fetch projects from API
         await fetchProjects();
 
-        // Set user data
         setUserData({
           name: "Dileep Krishna",
           title: "MEARN Stack Developer",
@@ -89,7 +107,7 @@ const Home = () => {
           linkedin: "https://linkedin.com/in/dileepkrishna-t",
           description: "I'm a BCA student and aspiring MEARN Stack Developer. I enjoy building modern, responsive web applications and learning new technologies.",
           degree: "BCA",
-          profileImage: "" // Add your image URL here
+          profileImage: ""
         });
 
       } catch (error) {
@@ -117,6 +135,33 @@ const Home = () => {
 
   return (
     <div className="bg-dark text-light">
+      {/* Robot Component */}
+      <div className={`robot-container ${showRobot ? 'visible' : ''}`}>
+        <div className="contact-text">
+          <svg width="300" height="150" viewBox="0 0 300 150">
+            <text x="150" y="75" textAnchor="middle" fill="#00ff00" fontSize="20" fontWeight="800" letterSpacing="4">
+         
+            </text>
+          </svg>
+        </div>
+        <img 
+          src={robot}
+          alt="Robot Assistant" 
+          className="robot"
+        />
+        {/* <button 
+          className="robot-hand-btn"
+          onClick={() => {
+            const contactSection = document.getElementById('contact');
+            if (contactSection) {
+              contactSection.scrollIntoView({ behavior: 'smooth' });
+            }
+          }}
+        >
+  
+        </button> */}
+      </div>
+
       {/* Hero Section */}
       <section
         className="container-fluid bg-dark d-flex align-items-center min-vh-100"
@@ -132,7 +177,6 @@ const Home = () => {
       >
         <div className="container py-5 position-relative z-1">
           <div className="row align-items-center">
-            {/* Left Content */}
             <div className="col-lg-6 text-center text-lg-start mb-5 mb-lg-0">
               <h5 className="text-info mb-2 animate-slide-up">
                 <span className="badge bg-info bg-opacity-10 border border-info rounded-pill px-3 py-1">
@@ -151,7 +195,6 @@ const Home = () => {
                 {description || "No description available."}
               </p>
 
-              {/* Enhanced Buttons */}
               <div className="d-flex gap-3 mt-4 animate-slide-up" style={{ animationDelay: '0.8s' }}>
                 <a href="#contact" className="btn btn-info btn-lg px-4">
                   <i className="bi bi-chat-dots me-2"></i>Get In Touch
@@ -161,7 +204,6 @@ const Home = () => {
                 </a>
               </div>
 
-              {/* Social Links */}
               <div className="mt-4 d-flex gap-3 animate-slide-up" style={{ animationDelay: '1s' }}>
                 <a href={userData.linkedin} target="_blank" rel="noopener noreferrer" className="text-info fs-5">
                   <i className="bi bi-linkedin"></i>
@@ -178,7 +220,6 @@ const Home = () => {
               </div>
             </div>
 
-            {/* Right Image */}
             <div className="col-lg-6 text-center">
               <div className="position-relative d-inline-block animate-scale">
                 <div className="position-absolute top-0 start-0 w-100 h-100 rounded-circle border border-info border-3 animate-pulse"></div>
@@ -198,7 +239,6 @@ const Home = () => {
             </div>
           </div>
 
-          {/* Scroll indicator */}
           <div className="text-center mt-5 animate-bounce">
             <a href="#about" className="text-info text-decoration-none">
               <i className="bi bi-chevron-down fs-2"></i>
@@ -220,7 +260,6 @@ const Home = () => {
       >
         <div className="container py-5">
           <div className="row align-items-center">
-            {/* About Text */}
             <div className="col-lg-6 mb-5 mb-lg-0">
               <h5 className="text-info mb-2">
                 <i className="bi bi-person-circle me-2"></i>
@@ -243,7 +282,6 @@ const Home = () => {
                 I enjoy turning complex problems into simple, elegant solutions.
               </p>
 
-              {/* Tech Stack */}
               <div className="d-flex flex-wrap gap-2 mb-4">
                 {['React', 'Node.js', 'Express', 'MongoDB', 'JavaScript', 'Bootstrap', 'Angular'].map((tech, index) => (
                   <span key={index} className="badge bg-info bg-opacity-10 border border-info text-info px-3 py-2">
@@ -258,7 +296,6 @@ const Home = () => {
               </a>
             </div>
 
-            {/* Personal Info Card */}
             <div className="col-lg-6">
               <div className="card bg-dark bg-opacity-50 border border-info border-opacity-25 rounded-4 p-4 shadow-lg hover-lift">
                 <div className="card-header bg-transparent border-bottom border-info border-opacity-25 pb-3 mb-3">
@@ -402,7 +439,6 @@ const Home = () => {
             ))}
           </div>
 
-          {/* Skill Summary */}
           <div className="row mt-5 pt-4 border-top border-info border-opacity-25">
             <div className="col-12">
               <div className="card bg-dark bg-opacity-50 border border-info border-opacity-25 rounded-4 p-4">
@@ -426,8 +462,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Projects Section - Trending Reels Style */}
-      {/* Projects Section - Updated to match your card structure */}
+      {/* Projects Section */}
       <section
         id="projects"
         className="container-fluid py-5"
@@ -465,14 +500,11 @@ const Home = () => {
             </div>
           ) : (
             <>
-              {/* Projects Grid */}
               <div className="row g-4 justify-content-center">
                 {projects.map((project, index) => (
                   <div className="col-lg-4 col-md-6" key={project._id || project.id || index}>
                     <div className="card bg-dark bg-opacity-75 border border-info border-opacity-25 rounded-4 shadow-lg overflow-hidden h-100 hover-lift">
-                      {/* Project Header */}
                       <div className="position-relative">
-                        {/* Project Image */}
                         <div className="project-image-container" style={{ height: '200px', overflow: 'hidden' }}>
                           {project.image ? (
                             <img
@@ -490,14 +522,8 @@ const Home = () => {
                             </div>
                           )}
                         </div>
-
-
-
-
-
                       </div>
 
-                      {/* Project Content */}
                       <div className="card-body p-4 d-flex flex-column">
                         <div className="d-flex justify-content-between align-items-start mb-3">
                           <h5 className="text-light fw-bold mb-0">
@@ -520,7 +546,6 @@ const Home = () => {
                             : project.description || 'A fantastic project showcasing modern web development skills.'}
                         </p>
 
-                        {/* Technologies Used */}
                         {project.technologies && project.technologies.length > 0 && (
                           <div className="mb-4">
                             <h6 className="text-info mb-2">
@@ -545,11 +570,7 @@ const Home = () => {
                           </div>
                         )}
 
-
-
-                        {/* Action Buttons */}
                         <div className="d-flex gap-2 mt-3 pt-3 border-top border-light border-opacity-25">
-                          {/* Code Button */}
                           <button
                             className="btn btn-outline-info btn-sm flex-fill hover-scale"
                             onClick={(e) => {
@@ -564,7 +585,6 @@ const Home = () => {
                             Code
                           </button>
 
-                          {/* Live Button */}
                           <button
                             className="btn btn-sm flex-fill hover-scale"
                             style={{
@@ -590,7 +610,6 @@ const Home = () => {
                         </div>
                       </div>
 
-                      {/* Project Footer */}
                       <div className="card-footer bg-transparent border-top border-info border-opacity-25 py-3">
                         <div className="d-flex justify-content-between align-items-center">
                           <div className="d-flex align-items-center">
@@ -612,7 +631,6 @@ const Home = () => {
                 ))}
               </div>
 
-              {/* View All Projects Button */}
               <div className="text-center mt-5">
                 <a href="/project" className="btn btn-outline-info btn-lg px-5 hover-scale bounce-effect">
                   <i className="bi bi-grid-3x3-gap me-2"></i>
@@ -623,6 +641,7 @@ const Home = () => {
           )}
         </div>
       </section>
+
       {/* Contact Section */}
       <section
         id="contact"
@@ -650,7 +669,6 @@ const Home = () => {
             <div className="col-lg-10">
               <div className="card bg-dark bg-opacity-50 border border-info border-opacity-25 rounded-4 shadow-lg overflow-hidden">
                 <div className="row g-0">
-                  {/* Contact Info Sidebar */}
                   <div className="col-lg-5 bg-dark bg-opacity-75 p-4">
                     <h4 className="text-light fw-bold mb-4">
                       <i className="bi bi-info-circle me-2"></i>
@@ -703,12 +721,8 @@ const Home = () => {
                         </div>
                       </div>
                     ))}
-
-                    {/* Business Hours */}
-
                   </div>
 
-                  {/* Contact Form */}
                   <div className="col-lg-7 p-4">
                     <h4 className="text-light fw-bold mb-4">
                       <i className="bi bi-send me-2"></i>
@@ -717,17 +731,10 @@ const Home = () => {
 
                     <form>
                       <div className="row g-3">
-
-
-
-
-                        <div className="col-12">
-
-                        </div>
+                        <div className="col-12"></div>
                       </div>
                     </form>
 
-                    {/* Quick Response Note */}
                     <div className="mt-4 p-3 rounded-3 bg-dark bg-opacity-25 border border-info border-opacity-25">
                       <div className="d-flex align-items-center">
                         <i className="bi bi-lightning text-info fs-4 me-3"></i>
@@ -762,7 +769,6 @@ const Home = () => {
 
             <div className="col-lg-4 mb-3 mb-lg-0">
               <div className="d-flex justify-content-center gap-4">
-                {/* Define actual social media links */}
                 {[
                   {
                     platform: 'linkedin',
@@ -825,293 +831,213 @@ const Home = () => {
         </div>
       </footer>
 
-      {/* Custom CSS for animations */}
-      <style jsx>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-20px); }
-        }
-        
-        @keyframes float-delayed {
-          0%, 100% { transform: translateY(0px) translateX(0px); }
-          50% { transform: translateY(20px) translateX(-20px); }
-        }
-        
-        @keyframes slide-up {
-          from { transform: translateY(20px); opacity: 0; }
-          to { transform: translateY(0); opacity: 1; }
-        }
-        
-        @keyframes scale-in {
-          from { transform: scale(0.9); opacity: 0; }
-          to { transform: scale(1); opacity: 1; }
-        }
-        
-        @keyframes blink {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0; }
-        }
-        
-        @keyframes pulse {
-          0%, 100% { transform: scale(1); opacity: 0.5; }
-          50% { transform: scale(1.05); opacity: 0.8; }
-        }
-        
-        @keyframes bounce {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-10px); }
-        }
-        
-        @keyframes reel-scroll {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(calc(-100% - 1rem)); }
-        }
-        
-        .animate-float {
-          animation: float 6s ease-in-out infinite;
-        }
-        
-        .animate-float-delayed {
-          animation: float-delayed 8s ease-in-out infinite;
-          animation-delay: 2s;
-        }
-        
-        .animate-slide-up {
-          animation: slide-up 0.6s ease-out forwards;
-          opacity: 0;
-        }
-        
-        .animate-scale {
-          animation: scale-in 0.8s ease-out forwards;
-        }
-        
-        .animate-blink {
-          animation: blink 1s infinite;
-        }
-        
-        .animate-pulse {
-          animation: pulse 2s infinite;
-        }
-        
-        .animate-bounce {
-          animation: bounce 2s infinite;
-        }
-        
-        .hover-lift {
-          transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        
-        .hover-lift:hover {
-          transform: translateY(-5px);
-          box-shadow: 0 10px 30px rgba(13, 202, 240, 0.2) !important;
-        }
-        
-        .hover-glow {
-          transition: all 0.3s ease;
-        }
-        
-        .hover-glow:hover {
-          border-color: rgba(13, 202, 240, 0.5) !important;
-          box-shadow: 0 0 15px rgba(13, 202, 240, 0.2);
-        }
-        
-        .card {
-          transition: all 0.3s ease;
-        }
-        
-        .card:hover {
-          transform: translateY(-5px);
-        }
-        
-        .progress-bar {
-          transition: width 1.5s ease-in-out;
-        }
-        
-        /* Reel Card Specific Styles */
-        .project-reel-card {
-          perspective: 1000px;
-        }
-        
-        .project-reel-card .card {
-          transform-style: preserve-3d;
-          transition: transform 0.5s ease;
-        }
-        
-        .project-reel-card:hover .card {
-          transform: rotateY(5deg) rotateX(5deg) translateY(-10px);
-        }
-        
-        .project-image-container {
-          position: relative;
-          overflow: hidden;
-        }
-        
-        .project-image-container::after {
-          content: '';
-          position: absolute;
-          bottom: 0;
-          left: 0;
-          right: 0;
-          height: 50%;
-          background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
-        }
-        
-        /* Reels-like horizontal scroll (optional) */
-        @media (min-width: 768px) {
-          .reels-container {
-            display: flex;
-            overflow-x: auto;
-            scroll-snap-type: x mandatory;
-            padding: 1rem 0;
-            gap: 1rem;
-            scrollbar-width: thin;
-            scrollbar-color: #0dcaf0 transparent;
-          }
-          
-          .reels-container::-webkit-scrollbar {
-            height: 6px;
-          }
-          
-          .reels-container::-webkit-scrollbar-track {
-            background: transparent;
-          }
-          
-          .reels-container::-webkit-scrollbar-thumb {
-            background-color: #0dcaf0;
-            border-radius: 3px;
-          }
-          
-          .reels-container > div {
-            flex: 0 0 auto;
-            width: 350px;
-            scroll-snap-align: start;
-          }
-        }
-          /* Add to your existing style block */
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+<style jsx>{`
+.robot-container {
+  position: absolute;
+  bottom: 170px;
+  right: end;
+  z-index: 999;
+  text-align: end;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.8s ease, transform 0.8s ease;
 }
 
-@keyframes fire {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.1); }
+.robot-container.visible {
+  opacity: 1;
+  pointer-events: auto;
+  animation: robotPeek 7s cubic-bezier(0.19, 1, 0.22, 1) forwards;
 }
 
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
+.robot-container.hiding {
+  animation: robotDisappear 0.8s ease-out forwards;
+  pointer-events: none;
 }
 
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-5px); }
+@keyframes robotPeek {
+  0% {
+    right: -2000px;
+    opacity: 0;
+  }
+  60% {
+    right: 0px;
+    opacity: 1;
+  }
+  80% {
+    right: -3px;
+  }
+  100% {
+    right: -4px;
+    opacity: 1;
+  }
 }
 
-@keyframes glow {
-  0%, 100% { box-shadow: 0 0 5px rgba(13, 202, 240, 0.5); }
-  50% { box-shadow: 0 0 15px rgba(13, 202, 240, 0.8); }
+@keyframes robotDisappear {
+  0% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(100px) scale(0.8);
+  }
 }
 
-@keyframes star {
-  0%, 100% { transform: rotate(0deg); }
-  25% { transform: rotate(15deg); }
-  75% { transform: rotate(-15deg); }
+.robot {
+  width: 340px;
+  animation: robotFloat 2.5s ease-in-out infinite;
+  transform-origin: end;
+  filter: drop-shadow(0 10px 25px rgba(0,188,212,0.4));
 }
 
-@keyframes progress {
-  from { width: 0%; }
-  to { width: attr(data-width); }
+@media (max-width: 768px) {
+  .robot-container {
+    bottom: -310px;
+    right: 20px;
+  }
 }
 
-@keyframes rocket {
-  0% { transform: translateX(0); }
-  25% { transform: translateX(3px); }
-  75% { transform: translateX(-3px); }
-  100% { transform: translateX(0); }
-}
 
-@keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-5px); }
 }
+  /* Your existing animations - UNCHANGED */
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+  }
+  
+  @keyframes slide-up {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  
+  @keyframes scale-in {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+  
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.05); opacity: 0.8; }
+  }
+  
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  .animate-slide-up {
+    animation: slide-up 0.6s ease-out forwards;
+    opacity: 0;
+  }
+  
+  .animate-scale {
+    animation: scale-in 0.8s ease-out forwards;
+  }
+  
+  .animate-blink {
+    animation: blink 1s infinite;
+  }
+  
+  .animate-pulse {
+    animation: pulse 2s infinite;
+  }
+  
+  .animate-bounce {
+    animation: bounce 2s infinite;
+  }
+  
+  .hover-lift {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .hover-lift:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(13, 202, 240, 0.2) !important;
+  }
+  
+  .hover-glow {
+    transition: all 0.3s ease;
+  }
+  
+  .hover-glow:hover {
+    border-color: rgba(13, 202, 240, 0.5) !important;
+    box-shadow: 0 0 15px rgba(13, 202, 240, 0.2);
+  }
+  
+  .project-image-container img {
+    transition: transform 0.5s ease;
+  }
+  
+  .project-image-container:hover img {
+    transform: scale(1.1);
+  }
 
-@keyframes scale {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-}
+  @keyframes fire {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+  }
 
-/* Animation Classes */
-.pulse-effect {
-  animation: pulse 2s infinite;
-}
+  @keyframes glow {
+    0%, 100% { box-shadow: 0 0 5px rgba(13, 202, 240, 0.5); }
+    50% { box-shadow: 0 0 15px rgba(13, 202, 240, 0.8); }
+  }
 
-.fire-effect {
-  animation: fire 1s infinite;
-}
+  @keyframes rocket {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(3px); }
+    75% { transform: translateX(-3px); }
+    100% { transform: translateX(0); }
+  }
 
-.blink-effect {
-  animation: blink 1s infinite;
-}
+  .fire-effect {
+    animation: fire 1s infinite;
+  }
 
-.float-effect {
-  animation: float 3s ease-in-out infinite;
-}
+  .blink-effect {
+    animation: blink 1s infinite;
+  }
 
-.glow-effect {
-  animation: glow 2s infinite;
-  transition: all 0.3s ease;
-}
+  .float-effect {
+    animation: float 3s ease-in-out infinite;
+  }
 
-.glow-effect:hover {
-  transform: scale(1.05);
-  background-color: rgba(13, 202, 240, 0.2) !important;
-}
+  .glow-effect {
+    animation: glow 2s infinite;
+    transition: all 0.3s ease;
+  }
 
-.star-effect {
-  animation: star 2s infinite;
-  display: inline-block;
-}
+  .glow-effect:hover {
+    transform: scale(1.05);
+    background-color: rgba(13, 202, 240, 0.2) !important;
+  }
 
-.progress-animate {
-  animation: progress 1.5s ease-out;
-}
+  .rocket-effect {
+    animation: rocket 1s infinite;
+    display: inline-block;
+  }
 
-.rocket-effect {
-  animation: rocket 1s infinite;
-  display: inline-block;
-}
+  .bounce-effect {
+    animation: bounce 2s infinite;
+  }
 
-.bounce-effect {
-  animation: bounce 2s infinite;
-}
+  .hover-scale {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
 
-.hover-scale {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.hover-scale:hover {
-  transform: scale(1.05);
-  box-shadow: 0 5px 15px rgba(13, 202, 240, 0.3);
-}
-
-.hover-lift {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.hover-lift:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 15px 30px rgba(13, 202, 240, 0.2);
-}
-
-.project-image-container img {
-  transition: transform 0.5s ease;
-}
-
-.project-image-container:hover img {
-  transform: scale(1.1);
-}
-      `}</style>
+  .hover-scale:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(13, 202, 240, 0.3);
+  }
+`}</style>
     </div>
   );
 };
