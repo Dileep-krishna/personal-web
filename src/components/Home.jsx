@@ -2,8 +2,15 @@ import React, { useState, useEffect, useRef } from "react";
 import { getAllSkillAPI, getProjectAPI } from "../services/allAPI";
 import axios from "axios";
 import robot from "./robot.png";
-
+import Modal from 'react-bootstrap/Modal';
+import Button from 'react-bootstrap/Button';
 const Home = () => {
+
+    const [show, setShow] = useState(false);
+
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
+
   const [userData, setUserData] = useState(null);
   const [skills, setSkills] = useState({
     frontend: [],
@@ -121,6 +128,9 @@ useEffect(() => {
     fetchData();
   }, []);
 
+
+  
+
   if (loading) {
     return (
       <div className="container-fluid bg-dark text-light min-vh-100 d-flex align-items-center justify-content-center">
@@ -145,11 +155,13 @@ useEffect(() => {
             </text>
           </svg>
         </div>
-        <img 
-          src={robot}
-          alt="Robot Assistant" 
-          className="robot"
-        />
+      <button onClick={handleShow} className="btn ">
+          <img 
+            src={robot}
+            alt="Robot Assistant" 
+            className="robot"
+          />
+      </button>
         {/* <button 
           className="robot-hand-btn"
           onClick={() => {
@@ -1048,7 +1060,381 @@ useEffect(() => {
     transform: scale(1.05);
     box-shadow: 0 5px 15px rgba(13, 202, 240, 0.3);
   }
+      .glass-modal .modal-content {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(13, 202, 240, 0.2);
+    border-radius: 12px;
+  }
+  
+  .hover-scale {
+    transition: transform 0.3s ease;
+  }
+  
+  .hover-scale:hover {
+    transform: scale(1.05);
+  }
 `}</style>
+<Modal 
+  show={show} 
+  onHide={handleClose}
+  centered
+  size="lg"
+  className="glass-modal"
+>
+  <Modal.Header 
+    closeButton 
+    className="bg-dark bg-opacity-75 border-bottom border-info border-opacity-25"
+  >
+    <Modal.Title className="text-info fw-bold">
+      <i className="bi bi-person-circle me-2"></i>
+      Login to Dashboard
+    </Modal.Title>
+  </Modal.Header>
+  
+  <Modal.Body className="bg-dark bg-opacity-50 text-light p-4">
+    <div className="row">
+      {/* Left Side - Login Form */}
+      <div className="col-lg-6">
+        <div className="text-center mb-4">
+          <div className="position-relative d-inline-block mb-3">
+            <div className="position-absolute top-0 start-0 w-100 h-100 rounded-circle border border-info border-3 animate-pulse"></div>
+            <i className="bi bi-person-badge text-info" style={{ fontSize: '3.5rem' }}></i>
+          </div>
+          <h5 className="text-info mb-2">
+            <i className="bi bi-shield-lock me-2"></i>
+            Secure Login
+          </h5>
+          <p className="text-light opacity-75 small">
+            Access your personalized dashboard
+          </p>
+        </div>
+
+        <form>
+          {/* Email Input */}
+          <div className="mb-4">
+            <label htmlFor="email" className="form-label text-light mb-2">
+              <i className="bi bi-envelope me-2 text-info"></i>
+              Email Address
+            </label>
+            <div className="input-group">
+              <span className="input-group-text bg-dark border-info border-opacity-25">
+                <i className="bi bi-at text-info"></i>
+              </span>
+              <input
+                type="email"
+                className="form-control bg-dark bg-opacity-25 border border-info border-opacity-25 text-light"
+                id="email"
+                placeholder="name@example.com"
+                style={{ 
+                  borderLeft: 'none',
+                  boxShadow: '0 0 10px rgba(13, 202, 240, 0.1)'
+                }}
+              />
+            </div>
+            <div className="form-text text-info opacity-75">
+              <i className="bi bi-info-circle me-1"></i>
+              Enter your registered email
+            </div>
+          </div>
+
+          {/* Password Input */}
+          <div className="mb-4">
+            <label htmlFor="password" className="form-label text-light mb-2">
+              <i className="bi bi-key me-2 text-info"></i>
+              Password
+            </label>
+            <div className="input-group">
+              <span className="input-group-text bg-dark border-info border-opacity-25">
+                <i className="bi bi-lock text-info"></i>
+              </span>
+              <input
+                type="password"
+                className="form-control bg-dark bg-opacity-25 border border-info border-opacity-25 text-light"
+                id="password"
+                placeholder="••••••••"
+                style={{ 
+                  borderLeft: 'none',
+                  boxShadow: '0 0 10px rgba(13, 202, 240, 0.1)'
+                }}
+              />
+              <button 
+                className="btn btn-outline-info border-info border-opacity-25" 
+                type="button"
+                id="togglePassword"
+              >
+                <i className="bi bi-eye"></i>
+              </button>
+            </div>
+            <div className="form-text text-info opacity-75">
+              <i className="bi bi-shield-check me-1"></i>
+              Minimum 8 characters with special characters
+            </div>
+          </div>
+
+          {/* Remember Me & Forgot Password */}
+          <div className="d-flex justify-content-between align-items-center mb-4">
+            <div className="form-check">
+              <input
+                className="form-check-input bg-dark border-info"
+                type="checkbox"
+                id="rememberMe"
+              />
+              <label className="form-check-label text-light opacity-75" htmlFor="rememberMe">
+                <i className="bi bi-check-circle me-1"></i>
+                Remember me
+              </label>
+            </div>
+            <a href="#" className="text-info text-decoration-none hover-glow">
+              <i className="bi bi-question-circle me-1"></i>
+              Forgot Password?
+            </a>
+          </div>
+
+          {/* Login Button */}
+          <button
+            type="submit"
+            className="btn btn-info w-100 py-3 mb-3 shadow-lg hover-scale"
+            style={{
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              border: 'none',
+              fontWeight: '600',
+              transition: 'all 0.3s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.transform = 'translateY(-2px)';
+              e.target.style.boxShadow = '0 15px 30px rgba(102, 126, 234, 0.4)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.transform = 'translateY(0)';
+              e.target.style.boxShadow = '0 5px 15px rgba(102, 126, 234, 0.3)';
+            }}
+          >
+            <i className="bi bi-box-arrow-in-right me-2"></i>
+            Login to Dashboard
+          </button>
+
+          {/* Divider */}
+          <div className="position-relative my-4">
+            <div className="border-top border-info border-opacity-25"></div>
+            <span className="position-absolute top-50 start-50 translate-middle bg-dark px-3 text-info small">
+              OR CONTINUE WITH
+            </span>
+          </div>
+
+          {/* Social Login Buttons */}
+          <div className="row g-2 mb-4">
+            <div className="col-6">
+              <button
+                type="button"
+                className="btn btn-outline-light w-100 d-flex align-items-center justify-content-center"
+              >
+                <i className="bi bi-google text-danger me-2"></i>
+                Google
+              </button>
+            </div>
+            <div className="col-6">
+              <button
+                type="button"
+                className="btn btn-outline-light w-100 d-flex align-items-center justify-content-center"
+              >
+                <i className="bi bi-github text-light me-2"></i>
+                GitHub
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      {/* Right Side - Features & Info */}
+      <div className="col-lg-6 border-start border-info border-opacity-25 ps-lg-4">
+        <div className="h-100 d-flex flex-column justify-content-center">
+          <h5 className="text-info mb-4">
+            <i className="bi bi-stars me-2"></i>
+            Dashboard Features
+          </h5>
+          
+          {[
+            {
+              icon: 'bi-speedometer2',
+              title: 'Analytics Dashboard',
+              desc: 'Real-time project metrics and insights'
+            },
+            {
+              icon: 'bi-folder-plus',
+              title: 'Project Management',
+              desc: 'Create and manage all your projects'
+            },
+            {
+              icon: 'bi-bar-chart',
+              title: 'Performance Reports',
+              desc: 'Detailed analytics and progress tracking'
+            },
+            {
+              icon: 'bi-bell',
+              title: 'Smart Notifications',
+              desc: 'Stay updated with important alerts'
+            }
+          ].map((feature, index) => (
+            <div key={index} className="d-flex align-items-start mb-3 p-3 rounded-3 bg-dark bg-opacity-25 border border-info border-opacity-25 hover-glow">
+              <div className="bg-info bg-opacity-10 rounded-circle p-2 me-3">
+                <i className={`bi ${feature.icon} text-info`}></i>
+              </div>
+              <div>
+                <h6 className="text-light mb-1">{feature.title}</h6>
+                <p className="text-light opacity-75 small mb-0">{feature.desc}</p>
+              </div>
+            </div>
+          ))}
+
+          <div className="mt-4 p-3 rounded-3 bg-info bg-opacity-10 border border-info border-opacity-25">
+            <div className="d-flex align-items-center">
+              <i className="bi bi-info-circle text-info fs-4 me-3"></i>
+              <div>
+                <h6 className="text-info mb-1">New to Dashboard?</h6>
+                <p className="text-light opacity-75 small mb-0">
+                  Don't have an account? 
+                  <a href="#" className="text-info ms-1 text-decoration-none hover-glow">
+                    Register here
+                    <i className="bi bi-arrow-right ms-1"></i>
+                  </a>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </Modal.Body>
+  
+  <Modal.Footer className="bg-dark bg-opacity-75 border-top border-info border-opacity-25">
+    <Button 
+      variant="outline-secondary" 
+      onClick={handleClose}
+      className="d-flex align-items-center"
+    >
+      <i className="bi bi-x-circle me-2"></i>
+      Cancel
+    </Button>
+    <Button 
+      variant="outline-info" 
+      onClick={handleClose}
+      className="d-flex align-items-center"
+    >
+      <i className="bi bi-question-circle me-2"></i>
+      Need Help?
+    </Button>
+  </Modal.Footer>
+</Modal>
+
+{/* Add to your CSS */}
+<style jsx>{`
+  .glass-modal .modal-content {
+    background: rgba(15, 12, 41, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(13, 202, 240, 0.3);
+    border-radius: 15px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    animation: modalSlide 0.4s ease-out;
+  }
+
+  @keyframes modalSlide {
+    from {
+      opacity: 0;
+      transform: translateY(-30px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .modal-backdrop.show {
+    opacity: 0.85;
+    background: linear-gradient(135deg, #0f0c29 0%, #302b63 100%);
+  }
+
+  .modal-header .btn-close {
+    filter: invert(1) brightness(2);
+    opacity: 0.7;
+    transition: all 0.3s ease;
+  }
+
+  .modal-header .btn-close:hover {
+    opacity: 1;
+    transform: rotate(90deg);
+    background-color: rgba(13, 202, 240, 0.2);
+  }
+
+  .form-control:focus {
+    background-color: rgba(0, 0, 0, 0.3);
+    border-color: #0dcaf0;
+    box-shadow: 0 0 15px rgba(13, 202, 240, 0.3);
+    color: white;
+  }
+
+  .form-control::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+  }
+
+  .hover-scale {
+    transition: transform 0.3s ease;
+  }
+
+  .hover-scale:hover {
+    transform: scale(1.02);
+  }
+
+  .hover-glow {
+    transition: all 0.3s ease;
+  }
+
+  .hover-glow:hover {
+    text-shadow: 0 0 10px rgba(13, 202, 240, 0.5);
+  }
+
+  .animate-pulse {
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 0.8; }
+  }
+
+  /* Password toggle button */
+  #togglePassword {
+    transition: all 0.3s ease;
+  }
+
+  #togglePassword:hover {
+    background-color: rgba(13, 202, 240, 0.1);
+  }
+`}</style>
+
+{/* Add JavaScript for password toggle */}
+<script dangerouslySetInnerHTML={{
+  __html: `
+    document.addEventListener('DOMContentLoaded', function() {
+      const togglePassword = document.getElementById('togglePassword');
+      const passwordInput = document.getElementById('password');
+      
+      if (togglePassword && passwordInput) {
+        togglePassword.addEventListener('click', function() {
+          const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+          passwordInput.setAttribute('type', type);
+          this.innerHTML = type === 'password' ? 
+            '<i class="bi bi-eye"></i>' : 
+            '<i class="bi bi-eye-slash"></i>';
+        });
+      }
+    });
+  `
+}} />
+
+
+
+
     </div>
   );
 };
