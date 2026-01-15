@@ -79,4 +79,10 @@ export const updateAdminProfileAPI = (id, formData) => {
   );
 };
 
+//login api
+
+export const loginAPI=async(reqBody)=>{
+  return await commonAPI("post",`${SERVERURL}/admin-login`,reqBody,{})
+}
+
 
