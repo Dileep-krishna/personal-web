@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import "./index.css";
-import robo from "./robo.png"; // 🤖 place image in same folder
+// 🤖 place image in same folder
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
  
 function Profile() {
   const [showLinks, setShowLinks] = useState(false);
-  const [showRobot, setShowRobot] = useState(false);
+  
 
   useEffect(() => {
     // 1️⃣ Show social links first
@@ -23,13 +23,10 @@ function Profile() {
     });
 
     // 2️⃣ Show robot after links
-    const robotTimer = setTimeout(() => {
-      setShowRobot(true);
-    }, 6000);
-
+  
     return () => {
       clearTimeout(linksTimer);
-      clearTimeout(robotTimer);
+
     };
   }, []);
 const navigate = useNavigate();
@@ -154,31 +151,7 @@ const handleHome = async () => {
       </div>
 
       {/* 🤖 Robot Side Assistant (appears AFTER links) */}
-      <div className={`robot-container ${showRobot ? "visible" : ""}`}>
-        <img src={robo} alt="Robot Assistant" className="robot" />
-  {/* 👉 Click Me Button on Robot Hand */}
-  <button
-    className="robot-hand-btn"
-
-  >
-    Hai
-  </button>
-        {/* Curved Contact Text */}
-        <svg className="contact-text" viewBox="0 0 300 150">
-          <defs>
-            <path
-              id="curve"
-              d="M 40 120 A 110 110 0 0 1 260 120"
-            />
-          </defs>
-
-          <text>
-            <textPath href="#curve" startOffset="50%" textAnchor="middle">
-          
-            </textPath>
-          </text>
-        </svg>
-      </div>
+    
     </div>
   );
 }

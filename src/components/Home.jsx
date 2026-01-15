@@ -3,9 +3,9 @@ import { getAllSkillAPI, getProjectAPI, loginAPI } from "../services/allAPI";
 import axios from "axios";
 import robot from "./robot.png";
 import Modal from 'react-bootstrap/Modal';
-import Button from 'react-bootstrap/Button';
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
+import "../components/home.css";
 
 
 const Home = () => {
@@ -19,7 +19,8 @@ const Home = () => {
   const [skills, setSkills] = useState({
     frontend: [],
     backend: [],
-    tools: []
+    tools: [],
+    programmingLanguage: []
   });
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -135,108 +136,108 @@ const Home = () => {
   const [password, setPassword] = useState("");
 
   //login api
-const navigate = useNavigate();
+  const navigate = useNavigate();
 
-const handleLogin = async () => {
-  const reqBody = { email, password };
+  const handleLogin = async () => {
+    const reqBody = { email, password };
 
-  try {
-    const result = await loginAPI(reqBody);
+    try {
+      const result = await loginAPI(reqBody);
 
-    // since result IS response.data in your case
-    if (result?.admin) {
+      // since result IS response.data in your case
+      if (result?.admin) {
 
-      // store admin (optional but recommended)
-      localStorage.setItem("admin", JSON.stringify(result.admin));
+        // store admin (optional but recommended)
+        localStorage.setItem("admin", JSON.stringify(result.admin));
 
-      Swal.fire({
-        icon: "success",
-        title: "Login Successful 🎉",
-        text: "Welcome Admin",
-        timer: 1500,
-        showConfirmButton: false
-      });
+        Swal.fire({
+          icon: "success",
+          title: "Login Successful 🎉",
+          text: "Welcome Admin",
+          timer: 1500,
+          showConfirmButton: false
+        });
 
-      setTimeout(() => {
-        navigate("/admin-home"); // home page
-      }, 1500);
+        setTimeout(() => {
+          navigate("/admin-home"); // home page
+        }, 1500);
 
-    } else {
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Login Failed, Admin Can Access This Login ",
+          text: "Invalid credentials"
+        });
+      }
+
+    } catch (error) {
+      console.log(error);
+
       Swal.fire({
         icon: "error",
-        title: "Login Failed, Admin Can Access This Login ",
-        text: "Invalid credentials"
+        title: "Server Error",
+        text: "Please try again later"
       });
     }
-
-  } catch (error) {
-    console.log(error);
-    
-    Swal.fire({
-      icon: "error",
-      title: "Server Error",
-      text: "Please try again later"
-    });
-  }
-};
-;
-// Add this useEffect for enhanced smooth scrolling
-useEffect(() => {
-  // Function for smooth scrolling
-  const smoothScrollTo = (targetId) => {
-    const target = document.getElementById(targetId);
-    if (!target) return;
-    
-    const headerHeight = 80; // Adjust based on your header height
-    const targetPosition = target.getBoundingClientRect().top + window.pageYOffset;
-    const startPosition = window.pageYOffset;
-    const distance = targetPosition - startPosition - headerHeight;
-    const duration = 1000; // 1 second
-    let start = null;
-    
-    // Easing function for smooth acceleration/deceleration
-    const easeInOutCubic = (t) => {
-      return t < 0.5 
-        ? 4 * t * t * t 
-        : 1 - Math.pow(-2 * t + 2, 3) / 2;
-    };
-    
-    const animation = (currentTime) => {
-      if (start === null) start = currentTime;
-      const timeElapsed = currentTime - start;
-      const progress = Math.min(timeElapsed / duration, 1);
-      const easeProgress = easeInOutCubic(progress);
-      
-      window.scrollTo(0, startPosition + distance * easeProgress);
-      
-      if (timeElapsed < duration) {
-        requestAnimationFrame(animation);
-      }
-    };
-    
-    requestAnimationFrame(animation);
   };
-  
-  // Attach smooth scroll to all anchor links
-  const anchorLinks = document.querySelectorAll('a[href^="#"]');
-  anchorLinks.forEach(link => {
-    link.addEventListener('click', (e) => {
-      const href = link.getAttribute('href');
-      if (href === '#') return;
-      
-      const targetId = href.substring(1);
-      if (targetId) {
-        e.preventDefault();
-        smoothScrollTo(targetId);
-      }
+  ;
+  // Add this useEffect for enhanced smooth scrolling
+  useEffect(() => {
+    // Function for smooth scrolling
+    const smoothScrollTo = (targetId) => {
+      const target = document.getElementById(targetId);
+      if (!target) return;
+
+      const headerHeight = 80; // Adjust based on your header height
+      const targetPosition = target.getBoundingClientRect().top + window.pageYOffset;
+      const startPosition = window.pageYOffset;
+      const distance = targetPosition - startPosition - headerHeight;
+      const duration = 1000; // 1 second
+      let start = null;
+
+      // Easing function for smooth acceleration/deceleration
+      const easeInOutCubic = (t) => {
+        return t < 0.5
+          ? 4 * t * t * t
+          : 1 - Math.pow(-2 * t + 2, 3) / 2;
+      };
+
+      const animation = (currentTime) => {
+        if (start === null) start = currentTime;
+        const timeElapsed = currentTime - start;
+        const progress = Math.min(timeElapsed / duration, 1);
+        const easeProgress = easeInOutCubic(progress);
+
+        window.scrollTo(0, startPosition + distance * easeProgress);
+
+        if (timeElapsed < duration) {
+          requestAnimationFrame(animation);
+        }
+      };
+
+      requestAnimationFrame(animation);
+    };
+
+    // Attach smooth scroll to all anchor links
+    const anchorLinks = document.querySelectorAll('a[href^="#"]');
+    anchorLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        const href = link.getAttribute('href');
+        if (href === '#') return;
+
+        const targetId = href.substring(1);
+        if (targetId) {
+          e.preventDefault();
+          smoothScrollTo(targetId);
+        }
+      });
     });
-  });
-  
-  // Add scroll progress indicator
-  const createScrollProgress = () => {
-    const progressBar = document.createElement('div');
-    progressBar.className = 'scroll-progress-bar';
-    progressBar.style.cssText = `
+
+    // Add scroll progress indicator
+    const createScrollProgress = () => {
+      const progressBar = document.createElement('div');
+      progressBar.className = 'scroll-progress-bar';
+      progressBar.style.cssText = `
       position: fixed;
       top: 0;
       left: 0;
@@ -247,105 +248,105 @@ useEffect(() => {
       transition: width 0.1s ease;
       box-shadow: 0 0 10px rgba(13, 202, 240, 0.5);
     `;
-    document.body.appendChild(progressBar);
-    
-    const updateProgress = () => {
-      const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
-      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-      const scrolled = (winScroll / height) * 100;
-      progressBar.style.width = scrolled + '%';
+      document.body.appendChild(progressBar);
+
+      const updateProgress = () => {
+        const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+        const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        const scrolled = (winScroll / height) * 100;
+        progressBar.style.width = scrolled + '%';
+      };
+
+      window.addEventListener('scroll', updateProgress);
+
+      return () => {
+        window.removeEventListener('scroll', updateProgress);
+        progressBar.remove();
+      };
     };
-    
-    window.addEventListener('scroll', updateProgress);
-    
+
+    // Initialize scroll progress
+    const cleanupProgress = createScrollProgress();
+
     return () => {
-      window.removeEventListener('scroll', updateProgress);
-      progressBar.remove();
+      // Cleanup
+      cleanupProgress();
     };
-  };
-  
-  // Initialize scroll progress
-  const cleanupProgress = createScrollProgress();
-  
-  return () => {
-    // Cleanup
-    cleanupProgress();
-  };
-}, []);
+  }, []);
 
-// Add this useEffect for scroll animations
-useEffect(() => {
-  const handleScroll = () => {
-    const aboutSection = document.getElementById('about');
-    if (!aboutSection) return;
+  // Add this useEffect for scroll animations
+  useEffect(() => {
+    const handleScroll = () => {
+      const aboutSection = document.getElementById('about');
+      if (!aboutSection) return;
 
-    const sectionTop = aboutSection.getBoundingClientRect().top;
-    const windowHeight = window.innerHeight;
-    
-    // When section is 50% visible
-    if (sectionTop < windowHeight * 0.5) {
-      // Add animate-in class to all animated elements
-      const animatedElements = aboutSection.querySelectorAll(
-        '.about-left, .about-right, .about-subtitle, .about-title, ' +
-        '.about-quote, .about-description, .tech-highlight, .about-tech, ' +
-        '.about-button, .about-card, .card-header-animate, .card-title-animate, ' +
-        '.info-grid, .info-item, .tech-badge'
-      );
-      
-      animatedElements.forEach(el => el.classList.add('animate-in'));
-    }
-  };
+      const sectionTop = aboutSection.getBoundingClientRect().top;
+      const windowHeight = window.innerHeight;
 
-  window.addEventListener('scroll', handleScroll);
-  // Trigger once on load in case section is already visible
-  handleScroll();
-  
-  return () => window.removeEventListener('scroll', handleScroll);
-}, []);
+      // When section is 50% visible
+      if (sectionTop < windowHeight * 0.5) {
+        // Add animate-in class to all animated elements
+        const animatedElements = aboutSection.querySelectorAll(
+          '.about-left, .about-right, .about-subtitle, .about-title, ' +
+          '.about-quote, .about-description, .tech-highlight, .about-tech, ' +
+          '.about-button, .about-card, .card-header-animate, .card-title-animate, ' +
+          '.info-grid, .info-item, .tech-badge'
+        );
 
-// Add this to your existing scroll animation useEffect or create a new one
-useEffect(() => {
-// Update the handleSkillsScroll function in your useEffect
-const handleSkillsScroll = () => {
-  const skillsSection = document.getElementById('skills');
-  if (!skillsSection) return;
+        animatedElements.forEach(el => el.classList.add('animate-in'));
+      }
+    };
 
-  const sectionTop = skillsSection.getBoundingClientRect().top;
-  const windowHeight = window.innerHeight;
-  
-  // When section is 50% visible
-  if (sectionTop < windowHeight * 0.5) {
-    // Add animate-in class to section
-    skillsSection.classList.add('animate-in');
-    
-    // Add animate-in class to all animated elements
-    const animatedElements = skillsSection.querySelectorAll(
-      '.skills-subtitle, .skills-description, .skill-category, ' +
-      '.skills-cta, .skill-card, .skill-card-header, .skill-icon-container, ' +
-      '.skill-category-title, .skill-item, .skill-card-footer, ' +
-      '.cta-title, .cta-description, .cta-button, .no-skills'
-    );
-    
-    animatedElements.forEach(el => el.classList.add('animate-in'));
-    
-    // Animate progress bars
-    const progressBars = skillsSection.querySelectorAll('.skill-progress-bar');
-    progressBars.forEach(bar => {
-      const level = bar.getAttribute('data-level') || 0;
-      // Directly set the width instead of using CSS variable
-      setTimeout(() => {
-        bar.style.width = `${level}%`;
-      }, 800); // Match the CSS transition delay
-    });
-  }
-};
+    window.addEventListener('scroll', handleScroll);
+    // Trigger once on load in case section is already visible
+    handleScroll();
 
-  window.addEventListener('scroll', handleSkillsScroll);
-  // Trigger once on load
-  handleSkillsScroll();
-  
-  return () => window.removeEventListener('scroll', handleSkillsScroll);
-}, []);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Add this to your existing scroll animation useEffect or create a new one
+  useEffect(() => {
+    // Update the handleSkillsScroll function in your useEffect
+    const handleSkillsScroll = () => {
+      const skillsSection = document.getElementById('skills');
+      if (!skillsSection) return;
+
+      const sectionTop = skillsSection.getBoundingClientRect().top;
+      const windowHeight = window.innerHeight;
+
+      // When section is 50% visible
+      if (sectionTop < windowHeight * 0.5) {
+        // Add animate-in class to section
+        skillsSection.classList.add('animate-in');
+
+        // Add animate-in class to all animated elements
+        const animatedElements = skillsSection.querySelectorAll(
+          '.skills-subtitle, .skills-description, .skill-category, ' +
+          '.skills-cta, .skill-card, .skill-card-header, .skill-icon-container, ' +
+          '.skill-category-title, .skill-item, .skill-card-footer, ' +
+          '.cta-title, .cta-description, .cta-button, .no-skills'
+        );
+
+        animatedElements.forEach(el => el.classList.add('animate-in'));
+
+        // Animate progress bars
+        const progressBars = skillsSection.querySelectorAll('.skill-progress-bar');
+        progressBars.forEach(bar => {
+          const level = bar.getAttribute('data-level') || 0;
+          // Directly set the width instead of using CSS variable
+          setTimeout(() => {
+            bar.style.width = `${level}%`;
+          }, 800); // Match the CSS transition delay
+        });
+      }
+    };
+
+    window.addEventListener('scroll', handleSkillsScroll);
+    // Trigger once on load
+    handleSkillsScroll();
+
+    return () => window.removeEventListener('scroll', handleSkillsScroll);
+  }, []);
 
 
 
@@ -479,271 +480,271 @@ const handleSkillsScroll = () => {
         </div>
       </section>
 
-    
-     {/* About Section */}
-<section
-  id="about"
-  className="container-fluid py-5"
-  style={{
-    backgroundImage: "linear-gradient(rgba(0,0,0,0.9), rgba(0,0,0,0.95)), url(https://wallpapers.com/images/high/gray-best-laptop-beside-iphone-aav9zfw3u9lzah0n.webp)",
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    backgroundAttachment: "fixed"
-  }}
->
-  <div className="container py-5">
-    <div className="row align-items-center">
-      <div className="col-lg-6 mb-5 mb-lg-0 about-left">
-        <h5 className="text-info mb-2 about-subtitle">
-          <i className="bi bi-person-circle me-2"></i>
-          Who Am I?
-        </h5>
-        <h2 className="fw-bold display-5 text-light mb-4 about-title">
-          About <span className="text-info tech-highlight">Me</span>
-        </h2>
 
-        <div className="card bg-dark bg-opacity-50 border border-info border-opacity-25 rounded-4 p-4 mb-4 shadow-lg about-quote">
-          <p className="lead text-light mb-0">
-            <i className="bi bi-quote text-info fs-4 me-2"></i>
-            {userData.description}
-          </p>
+      {/* About Section */}
+      <section
+        id="about"
+        className="container-fluid py-5"
+        style={{
+          backgroundImage: "linear-gradient(rgba(0,0,0,0.9), rgba(0,0,0,0.95)), url(https://wallpapers.com/images/high/gray-best-laptop-beside-iphone-aav9zfw3u9lzah0n.webp)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundAttachment: "fixed"
+        }}
+      >
+        <div className="container py-5">
+          <div className="row align-items-center">
+            <div className="col-lg-6 mb-5 mb-lg-0 about-left">
+              <h5 className="text-info mb-2 about-subtitle">
+                <i className="bi bi-person-circle me-2"></i>
+                Who Am I?
+              </h5>
+              <h2 className="fw-bold display-5 text-light mb-4 about-title">
+                About <span className="text-info tech-highlight">Me</span>
+              </h2>
+
+              <div className="card bg-dark bg-opacity-50 border border-info border-opacity-25 rounded-4 p-4 mb-4 shadow-lg about-quote">
+                <p className="lead text-light mb-0">
+                  <i className="bi bi-quote text-info fs-4 me-2"></i>
+                  {userData.description}
+                </p>
+              </div>
+
+              <p className="text-light mb-4 about-description">
+                I specialize in building modern full-stack web applications using{" "}
+                <span className="text-info fw-bold tech-highlight">React, Node.js, Express, Angular and MongoDB</span>.
+                I enjoy turning complex problems into simple, elegant solutions.
+              </p>
+
+              <div className="d-flex flex-wrap gap-2 mb-4 about-tech">
+                {['React', 'Node.js', 'Express', 'MongoDB', 'JavaScript', 'Bootstrap', 'Angular'].map((tech, index) => (
+                  <span key={index} className="badge bg-info bg-opacity-10 border border-info text-info px-3 py-2 tech-badge">
+                    <i className="bi bi-check-circle me-2"></i>
+                    {tech}
+                  </span>
+                ))}
+              </div>
+
+              <a href="#contact" className="btn btn-info btn-lg mt-3 shadow about-button">
+                <i className="bi bi-chat-dots me-2"></i>Let's Connect
+              </a>
+            </div>
+
+            <div className="col-lg-6 about-right">
+              <div className="card bg-dark bg-opacity-50 border border-info border-opacity-25 rounded-4 p-4 shadow-lg hover-lift about-card">
+                <div className="card-header bg-transparent border-bottom border-info border-opacity-25 pb-3 mb-3 card-header-animate">
+                  <h5 className="fw-bold mb-0 text-info card-title-animate">
+                    <i className="bi bi-person-badge me-2"></i>Personal Info
+                  </h5>
+                </div>
+
+                <div className="row g-3 info-grid">
+                  {[
+                    { label: "Name", value: userData.name, icon: "bi-person-fill", color: "text-info" },
+                    { label: "Education", value: userData.degree, icon: "bi-mortarboard-fill", color: "text-info" },
+                    { label: "Role", value: userData.title, icon: "bi-briefcase-fill", color: "text-info" },
+                    { label: "Location", value: userData.location, icon: "bi-geo-alt-fill", color: "text-info" },
+                    { label: "Email", value: userData.email, icon: "bi-envelope-fill", color: "text-info" },
+                    { label: "Phone", value: userData.phone, icon: "bi-telephone-fill", color: "text-info" }
+                  ].map((item, index) => (
+                    <div className="col-6 info-item" key={index}>
+                      <div className="p-3 rounded-3 border border-info border-opacity-25 bg-dark bg-opacity-25 hover-glow">
+                        <div className="d-flex align-items-center">
+                          <div className={`${item.color} me-3`}>
+                            <i className={`bi ${item.icon} fs-4`}></i>
+                          </div>
+                          <div>
+                            <h6 className="text-light mb-1 small">{item.label}</h6>
+                            <p className="text-light opacity-75 mb-0 small">{item.value}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+      </section>
 
-        <p className="text-light mb-4 about-description">
-          I specialize in building modern full-stack web applications using{" "}
-          <span className="text-info fw-bold tech-highlight">React, Node.js, Express, Angular and MongoDB</span>.
-          I enjoy turning complex problems into simple, elegant solutions.
-        </p>
+      {/* Skills Section */}
 
-        <div className="d-flex flex-wrap gap-2 mb-4 about-tech">
-          {['React', 'Node.js', 'Express', 'MongoDB', 'JavaScript', 'Bootstrap', 'Angular'].map((tech, index) => (
-            <span key={index} className="badge bg-info bg-opacity-10 border border-info text-info px-3 py-2 tech-badge">
-              <i className="bi bi-check-circle me-2"></i>
-              {tech}
-            </span>
-          ))}
-        </div>
-
-        <a href="#contact" className="btn btn-info btn-lg mt-3 shadow about-button">
-          <i className="bi bi-chat-dots me-2"></i>Let's Connect
-        </a>
-      </div>
-
-      <div className="col-lg-6 about-right">
-        <div className="card bg-dark bg-opacity-50 border border-info border-opacity-25 rounded-4 p-4 shadow-lg hover-lift about-card">
-          <div className="card-header bg-transparent border-bottom border-info border-opacity-25 pb-3 mb-3 card-header-animate">
-            <h5 className="fw-bold mb-0 text-info card-title-animate">
-              <i className="bi bi-person-badge me-2"></i>Personal Info
+      <section className="container-fluid py-5 skills-section"
+        style={{
+          backgroundImage: "linear-gradient(rgba(0,0,0,0.9), rgba(0,0,0,0.95)), url(https://wallpapers.com/images/high/gray-best-laptop-beside-iphone-aav9zfw3u9lzah0n.webp)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundAttachment: "fixed"
+        }}
+        id="skills"
+      >
+        <div className="container py-5">
+          <div className="text-center mb-5">
+            <h5 className="text-info mb-2 skills-subtitle">
+              <i className="bi bi-stars me-2"></i>
+              My Expertise
             </h5>
+            <h2 className="fw-bold display-5 text-light mb-3 skills-title">
+              <span className="skills-typing">Technical </span>
+              <span className="text-info skills-highlight">Skills</span>
+            </h2>
+            <p className="text-light opacity-75 skills-description">
+              Technologies I work with and my proficiency levels
+            </p>
           </div>
 
-          <div className="row g-3 info-grid">
+          <div className="row g-4 skills-container">
             {[
-              { label: "Name", value: userData.name, icon: "bi-person-fill", color: "text-info" },
-              { label: "Education", value: userData.degree, icon: "bi-mortarboard-fill", color: "text-info" },
-              { label: "Role", value: userData.title, icon: "bi-briefcase-fill", color: "text-info" },
-              { label: "Location", value: userData.location, icon: "bi-geo-alt-fill", color: "text-info" },
-              { label: "Email", value: userData.email, icon: "bi-envelope-fill", color: "text-info" },
-              { label: "Phone", value: userData.phone, icon: "bi-telephone-fill", color: "text-info" }
-            ].map((item, index) => (
-              <div className="col-6 info-item" key={index}>
-                <div className="p-3 rounded-3 border border-info border-opacity-25 bg-dark bg-opacity-25 hover-glow">
-                  <div className="d-flex align-items-center">
-                    <div className={`${item.color} me-3`}>
-                      <i className={`bi ${item.icon} fs-4`}></i>
+             
+              {
+                title: "Frontend Development",
+                skills: skills.frontend,
+                icon: "bi-display",
+                color: "primary",
+                hexColor: "#0d6efd",
+                rgbaColor: "rgba(13, 110, 253, 0.12)",
+                rgbaBorder: "rgba(13, 110, 253, 0.25)",
+                delay: "0.1s",
+                index: 1
+              },
+              {
+                title: "Backend Development",
+                skills: skills.backend,
+                icon: "bi-server",
+                color: "info",
+                hexColor: "#0dcaf0",
+                rgbaColor: "rgba(13, 202, 240, 0.12)",
+                rgbaBorder: "rgba(13, 202, 240, 0.25)",
+                delay: "0.2s",
+                index: 2
+              },
+              {
+                title: "Tools & Platforms",
+                skills: skills.tools,
+                icon: "bi-wrench",
+                color: "success",
+                hexColor: "#198754",
+                rgbaColor: "rgba(25, 135, 84, 0.12)",
+                rgbaBorder: "rgba(25, 135, 84, 0.25)",
+                delay: "0.3s",
+                index: 3
+              }
+            ].map((category, catIndex) => (
+              <div className="col-md-4 skill-category" key={catIndex} data-index={category.index}>
+                <div
+                  className="card bg-dark bg-opacity-50 border border-info border-opacity-25 h-100 shadow-lg hover-lift skill-card"
+                >
+                  <div className="card-header bg-transparent border-bottom border-info border-opacity-25 pb-3 skill-card-header">
+                    <div className="d-flex align-items-center">
+                      <div
+                        className="rounded-circle p-3 me-3 skill-icon-container"
+                        style={{
+                          backgroundColor: category.rgbaColor,
+                          border: `1px solid ${category.rgbaBorder}`
+                        }}
+                      >
+                        <i
+                          className={`bi ${category.icon} fs-4 skill-icon`}
+                          style={{ color: category.hexColor }}
+                        ></i>
+                      </div>
+                      <h5 className="fw-bold mb-0 text-light skill-category-title">
+                        {category.title}
+                      </h5>
                     </div>
-                    <div>
-                      <h6 className="text-light mb-1 small">{item.label}</h6>
-                      <p className="text-light opacity-75 mb-0 small">{item.value}</p>
-                    </div>
+                  </div>
+
+                  <div className="card-body skill-card-body">
+                    {category.skills.length === 0 ? (
+                      <div className="text-center py-4 no-skills">
+                        <i className="bi bi-tools text-info fs-1 mb-3 skill-empty-icon"></i>
+                        <p className="text-light">No skills added yet.</p>
+                      </div>
+                    ) : (
+                      category.skills.map((skill, skillIndex) => (
+                        <div key={skill._id || skillIndex} className="mb-4 skill-item">
+                          <div className="d-flex justify-content-between align-items-center mb-2 skill-item-header">
+                            <div className="d-flex align-items-center">
+                              <div
+                                className="rounded-circle p-2 me-2 skill-item-icon"
+                                style={{
+                                  backgroundColor: category.rgbaColor,
+                                  border: `1px solid ${category.rgbaBorder}`
+                                }}
+                              >
+                                <i
+                                  className="bi bi-code-slash"
+                                  style={{ color: category.hexColor }}
+                                ></i>
+                              </div>
+                              <span className="text-light fw-semibold skill-name">{skill.name}</span>
+                            </div>
+                            <span
+                              className="badge px-3 py-1 skill-level"
+                              style={{
+                                backgroundColor: category.hexColor,
+                                color: "white"
+                              }}
+                            >
+                              {skill.level}%
+                            </span>
+                          </div>
+                          <div className="progress skill-progress" style={{
+                            height: '10px',
+                            borderRadius: '5px',
+                            backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                          }}>
+                            <div
+                              className="skill-progress-bar"
+                              style={{
+                                width: '0%',
+                                borderRadius: '5px',
+                                backgroundColor: category.hexColor,
+                                height: '100%',
+                                transition: 'width 0.8s ease-out'
+                              }}
+                              data-level={skill.level}
+                            ></div>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+
+                  <div className="card-footer bg-transparent border-top border-info border-opacity-25 pt-3 skill-card-footer">
+                    <small className="text-info opacity-75">
+                      <i className="bi bi-info-circle me-1"></i>
+                      <span className="skill-count">{category.skills.length}</span> skills listed
+                    </small>
                   </div>
                 </div>
               </div>
             ))}
           </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
 
-      {/* Skills Section */}
-{/* Skills Section */}
-
-<section className="container-fluid py-5 skills-section"
-  style={{
-    backgroundImage: "linear-gradient(rgba(0,0,0,0.9), rgba(0,0,0,0.95)), url(https://wallpapers.com/images/high/gray-best-laptop-beside-iphone-aav9zfw3u9lzah0n.webp)",
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    backgroundAttachment: "fixed"
-  }}
-  id="skills"
->
-  <div className="container py-5">
-    <div className="text-center mb-5">
-      <h5 className="text-info mb-2 skills-subtitle">
-        <i className="bi bi-stars me-2"></i>
-        My Expertise
-      </h5>
-      <h2 className="fw-bold display-5 text-light mb-3 skills-title">
-        <span className="skills-typing">Technical </span>
-        <span className="text-info skills-highlight">Skills</span>
-      </h2>
-      <p className="text-light opacity-75 skills-description">
-        Technologies I work with and my proficiency levels
-      </p>
-    </div>
-
-    <div className="row g-4 skills-container">
-      {[
-        {
-          title: "Frontend Development",
-          skills: skills.frontend,
-          icon: "bi-display",
-          color: "primary",
-          hexColor: "#0d6efd",
-          rgbaColor: "rgba(13, 110, 253, 0.12)",
-          rgbaBorder: "rgba(13, 110, 253, 0.25)",
-          delay: "0s",
-          index: 0
-        },
-        {
-          title: "Backend Development",
-          skills: skills.backend,
-          icon: "bi-server",
-          color: "info",
-          hexColor: "#0dcaf0",
-          rgbaColor: "rgba(13, 202, 240, 0.12)",
-          rgbaBorder: "rgba(13, 202, 240, 0.25)",
-          delay: "0.1s",
-          index: 1
-        },
-        {
-          title: "Tools & Platforms",
-          skills: skills.tools,
-          icon: "bi-wrench",
-          color: "success",
-          hexColor: "#198754",
-          rgbaColor: "rgba(25, 135, 84, 0.12)",
-          rgbaBorder: "rgba(25, 135, 84, 0.25)",
-          delay: "0.2s",
-          index: 2
-        }
-      ].map((category, catIndex) => (
-        <div className="col-md-4 skill-category" key={catIndex} data-index={category.index}>
-          <div
-            className="card bg-dark bg-opacity-50 border border-info border-opacity-25 h-100 shadow-lg hover-lift skill-card"
-          >
-            <div className="card-header bg-transparent border-bottom border-info border-opacity-25 pb-3 skill-card-header">
-              <div className="d-flex align-items-center">
-                <div 
-                  className="rounded-circle p-3 me-3 skill-icon-container"
-                  style={{ 
-                    backgroundColor: category.rgbaColor,
-                    border: `1px solid ${category.rgbaBorder}`
-                  }}
-                >
-                  <i 
-                    className={`bi ${category.icon} fs-4 skill-icon`}
-                    style={{ color: category.hexColor }}
-                  ></i>
+          <div className="row mt-5 pt-4 border-top border-info border-opacity-25 skills-cta">
+            <div className="col-12">
+              <div className="card bg-dark bg-opacity-50 border border-info border-opacity-25 rounded-4 p-4 skills-cta-card">
+                <div className="row align-items-center">
+                  <div className="col-md-8">
+                    <h5 className="text-light mb-2 cta-title">Ready to take your project to the next level?</h5>
+                    <p className="text-light opacity-75 mb-0 cta-description">
+                      Let's work together to build something amazing with these technologies.
+                    </p>
+                  </div>
+                  <div className="col-md-4 text-md-end mt-3 mt-md-0">
+                    <a href="#contact" className="btn btn-info btn-lg cta-button">
+                      <i className="bi bi-lightning-charge me-2"></i>
+                      Start Project
+                    </a>
+                  </div>
                 </div>
-                <h5 className="fw-bold mb-0 text-light skill-category-title">
-                  {category.title}
-                </h5>
               </div>
             </div>
-
-            <div className="card-body skill-card-body">
-              {category.skills.length === 0 ? (
-                <div className="text-center py-4 no-skills">
-                  <i className="bi bi-tools text-info fs-1 mb-3 skill-empty-icon"></i>
-                  <p className="text-light">No skills added yet.</p>
-                </div>
-              ) : (
-                category.skills.map((skill, skillIndex) => (
-                  <div key={skill._id || skillIndex} className="mb-4 skill-item">
-                    <div className="d-flex justify-content-between align-items-center mb-2 skill-item-header">
-                      <div className="d-flex align-items-center">
-                        <div 
-                          className="rounded-circle p-2 me-2 skill-item-icon"
-                          style={{ 
-                            backgroundColor: category.rgbaColor,
-                            border: `1px solid ${category.rgbaBorder}`
-                          }}
-                        >
-                          <i 
-                            className="bi bi-code-slash"
-                            style={{ color: category.hexColor }}
-                          ></i>
-                        </div>
-                        <span className="text-light fw-semibold skill-name">{skill.name}</span>
-                      </div>
-                      <span 
-                        className="badge px-3 py-1 skill-level"
-                        style={{ 
-                          backgroundColor: category.hexColor,
-                          color: "white"
-                        }}
-                      >
-                        {skill.level}%
-                      </span>
-                    </div>
-                    <div className="progress skill-progress" style={{ 
-                      height: '10px', 
-                      borderRadius: '5px',
-                      backgroundColor: 'rgba(255, 255, 255, 0.1)'
-                    }}>
-                      <div
-                        className="skill-progress-bar"
-                        style={{
-                          width: '0%',
-                          borderRadius: '5px',
-                          backgroundColor: category.hexColor,
-                          height: '100%',
-                          transition: 'width 0.8s ease-out'
-                        }}
-                        data-level={skill.level}
-                      ></div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-
-            <div className="card-footer bg-transparent border-top border-info border-opacity-25 pt-3 skill-card-footer">
-              <small className="text-info opacity-75">
-                <i className="bi bi-info-circle me-1"></i>
-                <span className="skill-count">{category.skills.length}</span> skills listed
-              </small>
-            </div>
           </div>
         </div>
-      ))}
-    </div>
-
-    <div className="row mt-5 pt-4 border-top border-info border-opacity-25 skills-cta">
-      <div className="col-12">
-        <div className="card bg-dark bg-opacity-50 border border-info border-opacity-25 rounded-4 p-4 skills-cta-card">
-          <div className="row align-items-center">
-            <div className="col-md-8">
-              <h5 className="text-light mb-2 cta-title">Ready to take your project to the next level?</h5>
-              <p className="text-light opacity-75 mb-0 cta-description">
-                Let's work together to build something amazing with these technologies.
-              </p>
-            </div>
-            <div className="col-md-4 text-md-end mt-3 mt-md-0">
-              <a href="#contact" className="btn btn-info btn-lg cta-button">
-                <i className="bi bi-lightning-charge me-2"></i>
-                Start Project
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+      </section>
       {/* Projects Section */}
       <section
         id="projects"
@@ -1113,237 +1114,7 @@ const handleSkillsScroll = () => {
         </div>
       </footer>
 
-      <style jsx>{`
-  .robot-container {
-    position: absolute;
-    bottom: 170px;
-    right: end;
-    z-index: 999;
-    text-align: end;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.8s ease, transform 0.8s ease;
-  }
 
-  .robot-container.visible {
-    opacity: 1;
-    pointer-events: auto;
-    animation: robotPeek 7s cubic-bezier(0.19, 1, 0.22, 1) forwards,
-               robotDisappear 0.8s ease-out 3s forwards; /* Changed 5s to 3s */
-  }
-
-  .robot-container.hiding {
-    animation: robotDisappear 0.8s ease-out forwards;
-    pointer-events: none;
-  }
-
-  @keyframes robotPeek {
-    0% {
-      right: -2000px;
-      opacity: 0;
-    }
-    60% {
-      right: 0px;
-      opacity: 1;
-    }
-    80% {
-      right: -3px;
-    }
-    100% {
-      right: -4px;
-      opacity: 1;
-    }
-  }
-
-  @keyframes robotDisappear {
-    0% {
-      opacity: 1;
-      transform: translateX(0) scale(1);
-    }
-    100% {
-      opacity: 0;
-      transform: translateX(100px) scale(0.8);
-    }
-  }
-
-  .robot {
-    width: 340px;
-    animation: robotFloat 2.5s ease-in-out infinite;
-    transform-origin: end;
-    filter: drop-shadow(0 10px 25px rgba(0,188,212,0.4));
-  }
-
-  @keyframes robotFloat {
-    0%,100% { 
-      transform: translateY(0) rotate(0deg); 
-    }
-    75% { 
-      transform: translateY(-12px) rotate(-2deg); 
-    }
-  }
-
-  @media (max-width: 768px) {
-    .robot-container {
-      bottom: -310px;
-      right: 20px;
-    }
-  }
-
-
-}
-  /* Your existing animations - UNCHANGED */
-  @keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-20px); }
-  }
-  
-  @keyframes slide-up {
-    from { transform: translateY(20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-  }
-  
-  @keyframes scale-in {
-    from { transform: scale(0.9); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-  }
-  
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0; }
-  }
-  
-  @keyframes pulse {
-    0%, 100% { transform: scale(1); opacity: 0.5; }
-    50% { transform: scale(1.05); opacity: 0.8; }
-  }
-  
-  @keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
-  }
-  
-  .animate-float {
-    animation: float 6s ease-in-out infinite;
-  }
-  
-  .animate-slide-up {
-    animation: slide-up 0.6s ease-out forwards;
-    opacity: 0;
-  }
-  
-  .animate-scale {
-    animation: scale-in 0.8s ease-out forwards;
-  }
-  
-  .animate-blink {
-    animation: blink 1s infinite;
-  }
-  
-  .animate-pulse {
-    animation: pulse 2s infinite;
-  }
-  
-  .animate-bounce {
-    animation: bounce 2s infinite;
-  }
-  
-  .hover-lift {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-  }
-  
-  .hover-lift:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(13, 202, 240, 0.2) !important;
-  }
-  
-  .hover-glow {
-    transition: all 0.3s ease;
-  }
-  
-  .hover-glow:hover {
-    border-color: rgba(13, 202, 240, 0.5) !important;
-    box-shadow: 0 0 15px rgba(13, 202, 240, 0.2);
-  }
-  
-  .project-image-container img {
-    transition: transform 0.5s ease;
-  }
-  
-  .project-image-container:hover img {
-    transform: scale(1.1);
-  }
-
-  @keyframes fire {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-  }
-
-  @keyframes glow {
-    0%, 100% { box-shadow: 0 0 5px rgba(13, 202, 240, 0.5); }
-    50% { box-shadow: 0 0 15px rgba(13, 202, 240, 0.8); }
-  }
-
-  @keyframes rocket {
-    0% { transform: translateX(0); }
-    25% { transform: translateX(3px); }
-    75% { transform: translateX(-3px); }
-    100% { transform: translateX(0); }
-  }
-
-  .fire-effect {
-    animation: fire 1s infinite;
-  }
-
-  .blink-effect {
-    animation: blink 1s infinite;
-  }
-
-  .float-effect {
-    animation: float 3s ease-in-out infinite;
-  }
-
-  .glow-effect {
-    animation: glow 2s infinite;
-    transition: all 0.3s ease;
-  }
-
-  .glow-effect:hover {
-    transform: scale(1.05);
-    background-color: rgba(13, 202, 240, 0.2) !important;
-  }
-
-  .rocket-effect {
-    animation: rocket 1s infinite;
-    display: inline-block;
-  }
-
-  .bounce-effect {
-    animation: bounce 2s infinite;
-  }
-
-  .hover-scale {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-  }
-
-  .hover-scale:hover {
-    transform: scale(1.05);
-    box-shadow: 0 5px 15px rgba(13, 202, 240, 0.3);
-  }
-      .glass-modal .modal-content {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(13, 202, 240, 0.2);
-    border-radius: 12px;
-  }
-  
-  .hover-scale {
-    transition: transform 0.3s ease;
-  }
-  
-  .hover-scale:hover {
-    transform: scale(1.05);
-  }
-`}</style>
       <Modal
         show={show}
         onHide={handleClose}
@@ -1537,632 +1308,6 @@ const handleSkillsScroll = () => {
 
 
       </Modal>
-
-      {/* Add to your CSS */}
-      <style jsx>{`
-  .glass-modal .modal-content {
-    background: rgba(15, 12, 41, 0.95);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(13, 202, 240, 0.3);
-    border-radius: 15px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
-    animation: modalSlide 0.4s ease-out;
-  }
-
-  @keyframes modalSlide {
-    from {
-      opacity: 0;
-      transform: translateY(-30px) scale(0.95);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
-  }
-
-  .modal-backdrop.show {
-    opacity: 0.85;
-    background: linear-gradient(135deg, #0f0c29 0%, #302b63 100%);
-  }
-
-  .modal-header .btn-close {
-    filter: invert(1) brightness(2);
-    opacity: 0.7;
-    transition: all 0.3s ease;
-  }
-
-  .modal-header .btn-close:hover {
-    opacity: 1;
-    transform: rotate(90deg);
-    background-color: rgba(13, 202, 240, 0.2);
-  }
-
-  .form-control:focus {
-    background-color: rgba(0, 0, 0, 0.3);
-    border-color: #0dcaf0;
-    box-shadow: 0 0 15px rgba(13, 202, 240, 0.3);
-    color: white;
-  }
-
-  .form-control::placeholder {
-    color: rgba(255, 255, 255, 0.4);
-  }
-
-  .hover-scale {
-    transition: transform 0.3s ease;
-  }
-
-  .hover-scale:hover {
-    transform: scale(1.02);
-  }
-
-  .hover-glow {
-    transition: all 0.3s ease;
-  }
-
-  .hover-glow:hover {
-    text-shadow: 0 0 10px rgba(13, 202, 240, 0.5);
-  }
-
-  .animate-pulse {
-    animation: pulse 2s infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 0.5; }
-    50% { opacity: 0.8; }
-  }
-
-  /* Password toggle button */
-  #togglePassword {
-    transition: all 0.3s ease;
-  }
-
-  #togglePassword:hover {
-    background-color: rgba(13, 202, 240, 0.1);
-  }
- .about-left, 
-  .about-right, 
-  .about-subtitle, 
-  .about-title,
-  .about-quote, 
-  .about-description, 
-  .about-tech,
-  .about-button, 
-  .about-card, 
-  .card-header-animate, 
-  .card-title-animate,
-  .info-grid, 
-  .info-item, 
-  .tech-badge {
-    opacity: 1; /* Changed from 0 to 1 to prevent disappearing */
-    visibility: visible; /* Changed from hidden to visible */
-  }
-
-  /* Left column - initially positioned off-screen */
-  .about-left {
-    transform: translateX(-100px);
-    transition: all 0.8s ease-out 0.2s;
-  }
-
-  .about-left.animate-in {
-    transform: translateX(0);
-  }
-
-  .about-subtitle {
-    transform: translateY(20px);
-    transition: all 0.6s ease-out 0.4s;
-  }
-
-  .about-subtitle.animate-in {
-    transform: translateY(0);
-  }
-
-  .about-title {
-    transform: translateY(20px);
-    transition: all 0.6s ease-out 0.6s;
-  }
-
-  .about-title.animate-in {
-    transform: translateY(0);
-  }
-
-  .about-quote {
-    transform: scale(0.9) translateY(30px);
-    transition: all 0.7s ease-out 0.8s;
-  }
-
-  .about-quote.animate-in {
-    transform: scale(1) translateY(0);
-  }
-
-  .about-description {
-    transform: translateY(20px);
-    transition: all 0.6s ease-out 1.2s;
-  }
-
-  .about-description.animate-in {
-    transform: translateY(0);
-  }
-
-  .tech-highlight {
-    display: inline-block;
-    transform: translateY(10px);
-    transition: all 0.5s ease-out 1.4s;
-  }
-
-  .tech-highlight.animate-in {
-    transform: translateY(0);
-  }
-
-  .about-tech {
-    transform: translateY(20px);
-    transition: all 0.6s ease-out 1.6s;
-  }
-
-  .about-tech.animate-in {
-    transform: translateY(0);
-  }
-
-  .about-button {
-    transform: translateY(20px);
-    transition: all 0.6s ease-out 2s;
-  }
-
-  .about-button.animate-in {
-    transform: translateY(0);
-  }
-
-  /* Right column animations */
-  .about-right {
-    transform: translateX(100px);
-    transition: all 0.8s ease-out 0.4s;
-  }
-
-  .about-right.animate-in {
-    transform: translateX(0);
-  }
-
-  .about-card {
-    transform: translateY(30px) rotateX(10deg);
-    transition: all 0.8s ease-out 0.6s;
-  }
-
-  .about-card.animate-in {
-    transform: translateY(0) rotateX(0);
-  }
-
-  .card-header-animate {
-    transform: translateY(-20px);
-    transition: all 0.6s ease-out 0.8s;
-  }
-
-  .card-header-animate.animate-in {
-    transform: translateY(0);
-  }
-
-  .card-title-animate {
-    transform: translateX(-20px);
-    transition: all 0.6s ease-out 1s;
-  }
-
-  .card-title-animate.animate-in {
-    transform: translateX(0);
-  }
-
-  .info-grid {
-    opacity: 1; /* Changed from 0 to 1 */
-    transition: all 0.6s ease-out 1.2s;
-  }
-
-  .info-grid.animate-in {
-    opacity: 1;
-  }
-
-  .info-item {
-    transform: translateY(20px) scale(0.9);
-    transition: all 0.5s ease-out;
-  }
-
-  .info-item.animate-in {
-    transform: translateY(0) scale(1);
-  }
-
-  .tech-badge {
-    transform: translateY(10px) scale(0.8);
-    transition: all 0.4s ease-out;
-  }
-
-  .tech-badge.animate-in {
-    transform: translateY(0) scale(1);
-  }
-
-  /* Stagger delays for tech badges */
-  .tech-badge:nth-child(1) { transition-delay: 1.6s; }
-  .tech-badge:nth-child(2) { transition-delay: 1.7s; }
-  .tech-badge:nth-child(3) { transition-delay: 1.8s; }
-  .tech-badge:nth-child(4) { transition-delay: 1.9s; }
-  .tech-badge:nth-child(5) { transition-delay: 2.0s; }
-  .tech-badge:nth-child(6) { transition-delay: 2.1s; }
-  .tech-badge:nth-child(7) { transition-delay: 2.2s; }
-
-  /* Stagger delays for info items */
-  .info-item:nth-child(1) { transition-delay: 1.2s; }
-  .info-item:nth-child(2) { transition-delay: 1.3s; }
-  .info-item:nth-child(3) { transition-delay: 1.4s; }
-  .info-item:nth-child(4) { transition-delay: 1.5s; }
-  .info-item:nth-child(5) { transition-delay: 1.6s; }
-  .info-item:nth-child(6) { transition-delay: 1.7s; }
-  /* ===== SKILLS SECTION ANIMATIONS ===== */
-
-/* ===== SKILLS SECTION ANIMATIONS - FAST VERSION ===== */
-
-/* Section entrance animation - FASTER */
-.skills-section {
-  opacity: 1;
-  transform: translateY(30px);
-  transition: opacity 0.4s ease-out, transform 0.4s ease-out;
-}
-
-.skills-section.animate-in {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Typing animation for title - FASTER */
-.skills-typing {
-  display: inline-block;
-  overflow: hidden;
-  border-right: 2px solid #0dcaf0;
-  white-space: nowrap;
-  animation: typing 1s steps(10, end) 0.1s forwards, blink-caret 0.5s step-end infinite;
-  width: 0;
-  max-width: fit-content;
-}
-
-.skills-highlight {
-  display: inline-block;
-  opacity: 0;
-  transform: scale(0.5);
-  animation: highlight-pop 0.3s ease-out 1.1s forwards;
-}
-
-@keyframes typing {
-  from { width: 0; }
-  to { width: 100%; }
-}
-
-@keyframes blink-caret {
-  from, to { border-color: transparent; }
-  50% { border-color: #0dcaf0; }
-}
-
-@keyframes highlight-pop {
-  0% { 
-    opacity: 0; 
-    transform: scale(0.5) rotate(-10deg); 
-  }
-  70% { 
-    transform: scale(1.1) rotate(5deg); 
-  }
-  100% { 
-    opacity: 1; 
-    transform: scale(1) rotate(0deg); 
-  }
-}
-
-/* Subtitle animation - FASTER */
-.skills-subtitle {
-  opacity: 0;
-  transform: translateY(10px);
-  transition: all 0.3s ease-out 0.1s;
-}
-
-.skills-subtitle.animate-in {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Description animation - FASTER */
-.skills-description {
-  opacity: 0;
-  transform: translateY(10px);
-  transition: all 0.3s ease-out 0.2s;
-}
-
-.skills-description.animate-in {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Cards stacking animation - FASTER */
-.skill-category {
-  opacity: 0;
-  transform: translateY(50px) rotateX(-15deg);
-  transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-}
-
-.skill-category.animate-in {
-  opacity: 1;
-  transform: translateY(0) rotateX(0);
-}
-
-/* Staggered card animations - REDUCED DELAYS */
-.skill-category[data-index="0"] { transition-delay: 0.2s; }
-.skill-category[data-index="1"] { transition-delay: 0.3s; }
-.skill-category[data-index="2"] { transition-delay: 0.4s; }
-
-/* Card header animation - FASTER */
-.skill-card-header {
-  opacity: 0;
-  transform: translateY(-10px);
-  transition: all 0.3s ease-out 0.1s;
-}
-
-.skill-card.animate-in .skill-card-header {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Icon animation - FASTER */
-.skill-icon-container {
-  opacity: 0;
-  transform: scale(0) rotate(-90deg);
-  transition: all 0.3s ease-out 0.15s;
-}
-
-.skill-card.animate-in .skill-icon-container {
-  opacity: 1;
-  transform: scale(1) rotate(0);
-}
-
-.skill-icon {
-  animation: icon-float 2s ease-in-out infinite;
-}
-
-@keyframes icon-float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-5px); }
-}
-
-/* Category title animation - FASTER */
-.skill-category-title {
-  opacity: 0;
-  transform: translateX(-10px);
-  transition: all 0.3s ease-out 0.2s;
-}
-
-.skill-card.animate-in .skill-category-title {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-/* Skill items animation - FASTER */
-.skill-item {
-  opacity: 0;
-  transform: translateX(-15px);
-  transition: all 0.25s ease-out;
-}
-
-.skill-card.animate-in .skill-item {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-/* Stagger skill items - FASTER */
-.skill-item:nth-child(1) { transition-delay: 0.25s; }
-.skill-item:nth-child(2) { transition-delay: 0.3s; }
-.skill-item:nth-child(3) { transition-delay: 0.35s; }
-.skill-item:nth-child(4) { transition-delay: 0.4s; }
-.skill-item:nth-child(5) { transition-delay: 0.45s; }
-
-/* Progress bar animation - FASTER */
-.skill-progress-bar {
-  transition: width 0.8s ease-out 0.5s;
-}
-
-.skill-card.animate-in .skill-progress-bar {
-  width: var(--target-width, 0%);
-}
-
-/* Skill level badge animation - FASTER */
-.skill-level {
-  opacity: 0;
-  transform: scale(0) rotate(45deg);
-  transition: all 0.3s ease-out 0.6s;
-}
-
-.skill-card.animate-in .skill-level {
-  opacity: 1;
-  transform: scale(1) rotate(0);
-}
-
-/* Card footer animation - FASTER */
-.skill-card-footer {
-  opacity: 0;
-  transform: translateY(10px);
-  transition: all 0.3s ease-out 0.7s;
-}
-
-.skill-card.animate-in .skill-card-footer {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Skill count animation - FASTER */
-.skill-count {
-  display: inline-block;
-  min-width: 1.5em;
-  text-align: center;
-  font-weight: bold;
-  opacity: 0;
-  transform: scale(0);
-  transition: all 0.3s ease-out 0.8s;
-}
-
-.skill-card.animate-in .skill-count {
-  opacity: 1;
-  transform: scale(1);
-}
-
-/* Empty state animation - FASTER */
-.no-skills {
-  opacity: 0;
-  transform: scale(0.8);
-  transition: all 0.3s ease-out 0.3s;
-}
-
-.skill-card.animate-in .no-skills {
-  opacity: 1;
-  transform: scale(1);
-}
-
-.skill-empty-icon {
-  animation: tool-spin 2s linear infinite;
-}
-
-@keyframes tool-spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* CTA section animation - FASTER */
-.skills-cta {
-  opacity: 0;
-  transform: translateY(30px);
-  transition: all 0.4s ease-out 0.9s;
-}
-
-.skills-cta.animate-in {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.cta-title {
-  opacity: 0;
-  transform: translateX(-15px);
-  transition: all 0.3s ease-out 1.0s;
-}
-
-.skills-cta.animate-in .cta-title {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-.cta-description {
-  opacity: 0;
-  transform: translateX(-15px);
-  transition: all 0.3s ease-out 1.1s;
-}
-
-.skills-cta.animate-in .cta-description {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-.cta-button {
-  opacity: 0;
-  transform: scale(0.8) translateX(15px);
-  transition: all 0.3s ease-out 1.2s;
-  position: relative;
-  overflow: hidden;
-}
-
-.skills-cta.animate-in .cta-button {
-  opacity: 1;
-  transform: scale(1) translateX(0);
-}
-
-.cta-button::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-  transition: 0.5s;
-}
-
-.cta-button:hover::before {
-  left: 100%;
-}
-
-/* Hover effects for cards - FASTER */
-.skill-card {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.skill-card:hover {
-  transform: translateY(-5px) rotateX(3deg);
-  box-shadow: 
-    0 10px 20px rgba(13, 202, 240, 0.3),
-    0 0 0 1px rgba(13, 202, 240, 0.1) !important;
-}
-
-/* Progress bar color animation on hover - FASTER */
-.skill-card:hover .skill-progress-bar {
-  animation: progress-glow 1s ease-in-out infinite;
-}
-
-@keyframes progress-glow {
-  0%, 100% { 
-    box-shadow: 0 0 3px currentColor;
-  }
-  50% { 
-    box-shadow: 0 0 8px currentColor;
-  }
-}
-
-/* INSTANT animation trigger - remove this if too fast */
-.skill-card.animate-in .skill-progress-bar {
-  transition: width 0.5s ease-out !important;
-}
-
-.skill-card.animate-in .skill-item {
-  transition-delay: calc(0.1s * var(--item-index, 1)) !important;
-}
-  /* Smooth scrolling for the entire page */
-html {
-  scroll-behavior: smooth;
-  scroll-padding-top: 70px; /* Adjust if you have a fixed header */
-}
-
-/* Custom scrollbar for better UX */
-::-webkit-scrollbar {
-  width: 10px;
-}
-
-::-webkit-scrollbar-track {
-  background: #1a1a2e;
-  border-left: 1px solid rgba(13, 202, 240, 0.1);
-}
-
-::-webkit-scrollbar-thumb {
-  background: #0dcaf0;
-  border-radius: 5px;
-  border: 2px solid #1a1a2e;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #0bb5d9;
-}
-
-/* Firefox */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: #0dcaf0 #1a1a2e;
-}
-`}</style>
-
-      {/* Add JavaScript for password toggle */}
-
-  `
-    
-
-
-
-
     </div>
   );
 };

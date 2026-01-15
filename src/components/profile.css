@@ -1,0 +1,134 @@
+/* RESET */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* BODY */
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* APP */
+.app {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+/* CONTAINER */
+.container {
+  text-align: center;
+  padding: 3rem;
+  border-radius: 30px;
+  max-width: 650px;
+  width: 100%;
+  position: relative;
+  animation: floatContainer 6s ease-in-out infinite;
+}
+
+@keyframes floatContainer {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+/* HEADER */
+.header {
+  margin-bottom: 2rem;
+}
+
+.title {
+  font-size: 2.6rem;
+  font-weight: 800;
+  background: linear-gradient(135deg,#667eea,#764ba2,#f093fb,#f5576c);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradientShift 4s ease infinite;
+}
+
+.subtitle {
+  margin-top: 10px;
+  font-size: 1.1rem;
+  color: #eee;
+  background: rgba(255,255,255,0.15);
+  padding: 8px 18px;
+  border-radius: 25px;
+}
+
+@keyframes gradientShift {
+  0%,100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* SOCIAL LINKS */
+.social-links {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
+  gap: 1.5rem;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s ease;
+}
+
+.social-links.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.social-link {
+  padding: 1.2rem;
+  border-radius: 25px;
+  font-weight: 600;
+  text-decoration: none;
+  color: white;
+  transition: all 0.4s ease;
+}
+
+.social-link:hover {
+  transform: translateY(-8px) scale(1.1);
+}
+
+/* PLATFORM COLORS */
+.linkedin { background:#0077b5; }
+.gmail { background:#ea4335; }
+.github { background:#24292e; }
+.instagram {
+  background: linear-gradient(45deg,#405de6,#5851db,#833ab4,#c13584,#e1306c,#fd1d1d);
+}
+
+/* SweetAlert2 styles */
+.swal2-popup {
+  background: transparent !important;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.5) !important;
+}
+
+.swal2-title, .swal2-content {
+  color: white !important;
+}
+
+.swal2-success-ring {
+  border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.swal2-success-line-tip, 
+.swal2-success-line-long {
+  background-color: #fff !important;
+}
+
+#skills .card {
+  border: none;
+  border-radius: 15px;
+}
+
+#skills li {
+  margin-bottom: 6px;
+}
