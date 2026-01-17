@@ -97,45 +97,45 @@ const Home = () => {
     }
   };
 
-const fetchProjects = async () => {
-  try {
-    setProjectLoading(true);
-    const response = await getProjectAPI();
-    if (response && response.data) {
-      // First, sort the projects by ID in ascending order (1, 2, 3...)
-      const sortedProjects = response.data.sort((a, b) => {
-        // Convert IDs to numbers for proper numeric sorting
-        const idA = a.id ? parseInt(a.id.toString().trim()) : 999999;
-        const idB = b.id ? parseInt(b.id.toString().trim()) : 999999;
-        
-        // Handle NaN cases
-        if (isNaN(idA) && isNaN(idB)) return 0;
-        if (isNaN(idA)) return 1; // Projects without ID go last
-        if (isNaN(idB)) return -1; // Projects with ID come first
-        
-        // Ascending order: 1, 2, 3...
-        return idA - idB;
-      });
-      
-      // Then take the first 5 projects
-      const projectsData = sortedProjects.slice(0, 5);
-      
-      // Log for debugging
-      console.log("Sorted projects:", projectsData.map(p => ({
-        id: p.id,
-        title: p.title,
-        parsedId: p.id ? parseInt(p.id.toString().trim()) : 'N/A'
-      })));
-      
-      setProjects(projectsData);
+  const fetchProjects = async () => {
+    try {
+      setProjectLoading(true);
+      const response = await getProjectAPI();
+      if (response && response.data) {
+        // First, sort the projects by ID in ascending order (1, 2, 3...)
+        const sortedProjects = response.data.sort((a, b) => {
+          // Convert IDs to numbers for proper numeric sorting
+          const idA = a.id ? parseInt(a.id.toString().trim()) : 999999;
+          const idB = b.id ? parseInt(b.id.toString().trim()) : 999999;
+
+          // Handle NaN cases
+          if (isNaN(idA) && isNaN(idB)) return 0;
+          if (isNaN(idA)) return 1; // Projects without ID go last
+          if (isNaN(idB)) return -1; // Projects with ID come first
+
+          // Ascending order: 1, 2, 3...
+          return idA - idB;
+        });
+
+        // Then take the first 5 projects
+        const projectsData = sortedProjects.slice(0, 5);
+
+        // Log for debugging
+        console.log("Sorted projects:", projectsData.map(p => ({
+          id: p.id,
+          title: p.title,
+          parsedId: p.id ? parseInt(p.id.toString().trim()) : 'N/A'
+        })));
+
+        setProjects(projectsData);
+      }
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+      setProjects([]);
+    } finally {
+      setProjectLoading(false);
     }
-  } catch (error) {
-    console.error("Error fetching projects:", error);
-    setProjects([]);
-  } finally {
-    setProjectLoading(false);
-  }
-};
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -300,7 +300,7 @@ const fetchProjects = async () => {
         }
       });
     });
-  
+
 
     // Add scroll progress indicator
     const createScrollProgress = () => {
@@ -414,27 +414,27 @@ const fetchProjects = async () => {
     // Trigger once on load
     handleSkillsScroll();
 
-  
+
 
     return () => window.removeEventListener('scroll', handleSkillsScroll);
   }, []);
   // Add this function outside the JSX
-const scrollToProjects = () => {
-  console.log('Scrolling to projects');
-  const projectsSection = document.getElementById('projects');
-  if (projectsSection) {
-    projectsSection.scrollIntoView({ behavior: 'smooth' });
-  } else {
-    // If on a different page, navigate to home first
-    navigate('/');
-    setTimeout(() => {
-      const projectsSection = document.getElementById('projects');
-      if (projectsSection) {
-        projectsSection.scrollIntoView({ behavior: 'smooth' });
-      }
-    }, 500);
-  }
-};
+  const scrollToProjects = () => {
+    console.log('Scrolling to projects');
+    const projectsSection = document.getElementById('projects');
+    if (projectsSection) {
+      projectsSection.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      // If on a different page, navigate to home first
+      navigate('/');
+      setTimeout(() => {
+        const projectsSection = document.getElementById('projects');
+        if (projectsSection) {
+          projectsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 500);
+    }
+  };
 
   if (loading) {
     return (
@@ -505,40 +505,8 @@ const scrollToProjects = () => {
 
 
 
-<div className="d-flex p-3 me-2 gap-3 mt-4" style={{ animationDelay: '0.8s' }}>
-  <button 
-    onClick={() => {
-      console.log('Navigating to education');
-      navigate('/education');
-    }}
-    className="btn btn-info btn-lg px-4 animate-slide-up"
-    style={{ animationDelay: '0.8s' }}
-  >
-    <i className="bi bi-chat-dots me-2"></i>See Education & Internships
-  </button>
-  
-  <button 
-    onClick={scrollToProjects}
-    className="btn btn-outline-info btn-lg px-4 animate-slide-up"
-    style={{ animationDelay: '0.8s' }}
-  >
-    <i className="bi bi-briefcase me-2"></i>View Projects
-  </button>
-</div>
-              <div className="mt-4 d-flex gap-3 animate-slide-up" style={{ animationDelay: '1s' }}>
-                <a href={userData.linkedin} target="_blank" rel="noopener noreferrer" className="text-info fs-5">
-                  <i className="bi bi-linkedin"></i>
-                </a>
-                <a href={`mailto:${userData.email}`} className="text-info fs-5">
-                  <i className="bi bi-envelope"></i>
-                </a>
-                <a href={`tel:${userData.phone}`} className="text-info fs-5">
-                  <i className="bi bi-telephone"></i>
-                </a>
-                <a href='https://github.com/Dileep-krishna' className="text-info fs-5">
-                  <i className="bi bi-github"></i>
-                </a>
-              </div>
+
+          
             </div>
 
             <div className="col-lg-6 text-center">
@@ -567,11 +535,68 @@ const scrollToProjects = () => {
           </div>
         </div>
       </section>
+     <div className="d-flex flex-wrap gap-3 mt-4 user-select-none justify-content-center align-items-center">
+  <button
+    onClick={() => navigate("/education")}
+    className="btn btn-info btn-lg px-4 user-select-none"
+  >
+    <i className="bi bi-mortarboard me-2"></i>
+    Education & Internships
+  </button>
+
+  <button
+    onClick={scrollToProjects}
+    className="btn btn-outline-info btn-lg px-4 user-select-none"
+  >
+    <i className="bi bi-briefcase me-2"></i>
+    View Projects
+  </button>
+
+  <button
+    onClick={() => navigate("/resume")}
+    className="btn btn-success btn-lg px-4 user-select-none"
+  >
+    <i className="bi bi-file-earmark-pdf me-2"></i>
+    View Resume
+  </button>
+</div>
+<div
+  className="mt-4 d-flex gap-4 justify-content-center align-items-center animate-slide-up"
+  style={{ animationDelay: "1s" }}
+>
+  <a 
+    href={userData.linkedin} 
+    target="_blank" 
+    rel="noopener noreferrer" 
+    className="text-info social-icon-3d"
+  >
+    <i className="bi bi-linkedin"></i>
+  </a>
+
+  <a href={`mailto:${userData.email}`} className="text-info social-icon-3d">
+    <i className="bi bi-envelope"></i>
+  </a>
+
+  <a href={`tel:${userData.phone}`} className="text-info social-icon-3d">
+    <i className="bi bi-telephone"></i>
+  </a>
+
+  <a 
+    href="https://github.com/Dileep-krishna" 
+    target="_blank" 
+    rel="noopener noreferrer" 
+    className="text-info social-icon-3d"
+  >
+    <i className="bi bi-github"></i>
+  </a>
+</div>
+
+
 
       {/* About Section */}
       <section
         id="about"
-        className="container-fluid py-5"
+        className="container-fluid py-5 mt-4"
         style={{
           backgroundImage: "linear-gradient(rgba(0,0,0,0.9), rgba(0,0,0,0.95)), url(https://wallpapers.com/images/high/gray-best-laptop-beside-iphone-aav9zfw3u9lzah0n.webp)",
           backgroundSize: "cover",
@@ -980,244 +1005,244 @@ const scrollToProjects = () => {
       </section>
 
       {/* Projects Section */}
-   <section
-  id="projects"
-  className="container-fluid py-5"
-  style={{
-    backgroundImage: "linear-gradient(rgba(0,0,0,0.9), rgba(0,0,0,0.95)), url(https://wallpapers.com/images/high/gray-best-laptop-beside-iphone-aav9zfw3u9lzah0n.webp)",
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    backgroundAttachment: "fixed"
-  }}
->
-  <div className="container py-5">
-    <div className="text-center mb-5">
-      <h5 className="text-info mb-2">
-        <i className="bi bi-fire me-2"></i>
-        Trending Now
-      </h5>
-      <h2 className="fw-bold display-5 text-light mb-3">
-        Featured <span className="text-info">Projects</span>
-      </h2>
-      <p className="text-light opacity-75">Explore my latest work with reels-like experience</p>
-    </div>
+      <section
+        id="projects"
+        className="container-fluid py-5"
+        style={{
+          backgroundImage: "linear-gradient(rgba(0,0,0,0.9), rgba(0,0,0,0.95)), url(https://wallpapers.com/images/high/gray-best-laptop-beside-iphone-aav9zfw3u9lzah0n.webp)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundAttachment: "fixed"
+        }}
+      >
+        <div className="container py-5">
+          <div className="text-center mb-5">
+            <h5 className="text-info mb-2">
+              <i className="bi bi-fire me-2"></i>
+              Trending Now
+            </h5>
+            <h2 className="fw-bold display-5 text-light mb-3">
+              Featured <span className="text-info">Projects</span>
+            </h2>
+            <p className="text-light opacity-75">Explore my latest work with reels-like experience</p>
+          </div>
 
-    {projectLoading ? (
-      <div className="text-center py-5">
-        <div className="spinner-border text-info" role="status">
-          <span className="visually-hidden">Loading projects...</span>
-        </div>
-        <p className="text-info mt-3">Loading awesome projects...</p>
-      </div>
-    ) : projects.length === 0 ? (
-      <div className="text-center py-5">
-        <i className="bi bi-folder2-open text-info fs-1 mb-3"></i>
-        <h5 className="text-light">No projects found</h5>
-        <p className="text-light opacity-75">Check back soon for amazing projects!</p>
-      </div>
-    ) : (
-      <>
-        <div className="row g-4 justify-content-center">
-          {projects
-            // Create a copy of the array to avoid mutating the original
-            .slice()
-            // Sort projects by numeric ID in ascending order (1, 2, 3...)
-            .sort((a, b) => {
-              // Debug logging to see what's happening
-              console.log('Sorting:', {
-                aTitle: a.title,
-                aId: a.id,
-                aIdType: typeof a.id,
-                bTitle: b.title,
-                bId: b.id,
-                bIdType: typeof b.id
-              });
-              
-              // Parse IDs as numbers, handle empty/undefined/null cases
-              const idA = a.id ? parseInt(a.id.toString().trim()) : 999999;
-              const idB = b.id ? parseInt(b.id.toString().trim()) : 999999;
-              
-              // If both are not numbers, keep original order
-              if (isNaN(idA) && isNaN(idB)) return 0;
-              // If A is not a number, put it at the end
-              if (isNaN(idA)) return 1;
-              // If B is not a number, put it at the end
-              if (isNaN(idB)) return -1;
-              
-              console.log('Parsed IDs:', { idA, idB, result: idA - idB });
-              return idA - idB; // Ascending order: 1, 2, 3...
-            })
-            // Map through sorted projects
-            .map((project) => {
-              // Get the project ID as a number
-              const projectId = project.id ? parseInt(project.id.toString().trim()) : null;
-              const displayId = !isNaN(projectId) ? projectId : 'N/A';
-              
-              return (
-                <div className="col-lg-4 col-md-6" key={project._id || project.id || displayId}>
-                  <div className="card bg-dark bg-opacity-75 border border-info border-opacity-25 rounded-4 shadow-lg overflow-hidden h-100 hover-lift">
-                    <div className="position-relative">
-                      {/* Project number badge - shows actual ID */}
-                      {!isNaN(projectId) && (
-                        <div className="position-absolute top-0 start-0 m-3" style={{ zIndex: 1 }}>
-                          <span className="badge bg-info bg-opacity-90 border border-info px-3 py-2 rounded-pill fw-bold shadow">
-                            Project #{displayId}
-                          </span>
-                        </div>
-                      )}
-                      
-                      <div className="project-image-container" style={{ height: '200px', overflow: 'hidden' }}>
-                        {project.image ? (
-                          <img
-                            src={`http://localhost:4000/imguploads/${project.image}`}
-                            alt={project.title}
-                            className="img-fluid w-100 h-100"
-                            style={{
-                              objectFit: 'cover',
-                              transition: 'transform 0.5s ease'
-                            }}
-                            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-                            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                          />
-                        ) : (
-                          <div className="w-100 h-100 bg-info bg-opacity-10 d-flex align-items-center justify-content-center">
-                            <i className="bi bi-laptop text-info fs-1"></i>
-                          </div>
-                        )}
-                      </div>
-                    </div>
+          {projectLoading ? (
+            <div className="text-center py-5">
+              <div className="spinner-border text-info" role="status">
+                <span className="visually-hidden">Loading projects...</span>
+              </div>
+              <p className="text-info mt-3">Loading awesome projects...</p>
+            </div>
+          ) : projects.length === 0 ? (
+            <div className="text-center py-5">
+              <i className="bi bi-folder2-open text-info fs-1 mb-3"></i>
+              <h5 className="text-light">No projects found</h5>
+              <p className="text-light opacity-75">Check back soon for amazing projects!</p>
+            </div>
+          ) : (
+            <>
+              <div className="row g-4 justify-content-center">
+                {projects
+                  // Create a copy of the array to avoid mutating the original
+                  .slice()
+                  // Sort projects by numeric ID in ascending order (1, 2, 3...)
+                  .sort((a, b) => {
+                    // Debug logging to see what's happening
+                    console.log('Sorting:', {
+                      aTitle: a.title,
+                      aId: a.id,
+                      aIdType: typeof a.id,
+                      bTitle: b.title,
+                      bId: b.id,
+                      bIdType: typeof b.id
+                    });
 
-                    <div className="card-body p-4 d-flex flex-column">
-                      <div className="d-flex justify-content-between align-items-start mb-3">
-                        <div>
-                          <h5 className="text-light fw-bold mb-1">
-                            {project.title}
-                            <span className="text-info blink-effect ms-1">_</span>
-                          </h5>
-                          {/* Show ID under title */}
-                          <small className="text-info opacity-75">
-                            <i className="bi bi-hash me-1"></i>
-                            ID: {displayId}
-                          </small>
-                        </div>
-                        <div className="d-flex gap-2">
-                          {project.live && project.live !== '#' && (
-                            <i className="bi bi-rocket-takeoff text-success fs-5 float-effect"></i>
-                          )}
-                          {project.github && project.github !== '#' && (
-                            <i className="bi bi-github text-light fs-5"></i>
-                          )}
-                        </div>
-                      </div>
+                    // Parse IDs as numbers, handle empty/undefined/null cases
+                    const idA = a.id ? parseInt(a.id.toString().trim()) : 999999;
+                    const idB = b.id ? parseInt(b.id.toString().trim()) : 999999;
 
-                      <p className="text-light opacity-75 mb-4 flex-grow-1" style={{ fontSize: '0.9rem' }}>
-                        {project.description && project.description.length > 120
-                          ? `${project.description.substring(0, 120)}...`
-                          : project.description || 'A fantastic project showcasing modern web development skills.'}
-                      </p>
+                    // If both are not numbers, keep original order
+                    if (isNaN(idA) && isNaN(idB)) return 0;
+                    // If A is not a number, put it at the end
+                    if (isNaN(idA)) return 1;
+                    // If B is not a number, put it at the end
+                    if (isNaN(idB)) return -1;
 
-                      {project.technologies && project.technologies.length > 0 && (
-                        <div className="mb-4">
-                          <h6 className="text-info mb-2">
-                            <i className="bi bi-tags me-1"></i>
-                            Technologies
-                          </h6>
-                          <div className="d-flex flex-wrap gap-2">
-                            {project.technologies.slice(0, 3).map((tech, techIndex) => (
-                              <span
-                                key={techIndex}
-                                className="badge bg-info bg-opacity-10 border border-info border-opacity-25 text-info px-2 py-1 glow-effect"
-                              >
-                                {tech}
-                              </span>
-                            ))}
-                            {project.technologies.length > 3 && (
-                              <span className="badge bg-dark border border-info border-opacity-25 text-info px-2 py-1 glow-effect">
-                                +{project.technologies.length - 3} more
-                              </span>
+                    console.log('Parsed IDs:', { idA, idB, result: idA - idB });
+                    return idA - idB; // Ascending order: 1, 2, 3...
+                  })
+                  // Map through sorted projects
+                  .map((project) => {
+                    // Get the project ID as a number
+                    const projectId = project.id ? parseInt(project.id.toString().trim()) : null;
+                    const displayId = !isNaN(projectId) ? projectId : 'N/A';
+
+                    return (
+                      <div className="col-lg-4 col-md-6" key={project._id || project.id || displayId}>
+                        <div className="card bg-dark bg-opacity-75 border border-info border-opacity-25 rounded-4 shadow-lg overflow-hidden h-100 hover-lift">
+                          <div className="position-relative">
+                            {/* Project number badge - shows actual ID */}
+                            {!isNaN(projectId) && (
+                              <div className="position-absolute top-0 start-0 m-3" style={{ zIndex: 1 }}>
+                                <span className="badge bg-info bg-opacity-90 border border-info px-3 py-2 rounded-pill fw-bold shadow">
+                                  Project #{displayId}
+                                </span>
+                              </div>
                             )}
+
+                            <div className="project-image-container" style={{ height: '200px', overflow: 'hidden' }}>
+                              {project.image ? (
+                                <img
+                                  src={`http://localhost:4000/imguploads/${project.image}`}
+                                  alt={project.title}
+                                  className="img-fluid w-100 h-100"
+                                  style={{
+                                    objectFit: 'cover',
+                                    transition: 'transform 0.5s ease'
+                                  }}
+                                  onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                                  onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                                />
+                              ) : (
+                                <div className="w-100 h-100 bg-info bg-opacity-10 d-flex align-items-center justify-content-center">
+                                  <i className="bi bi-laptop text-info fs-1"></i>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="card-body p-4 d-flex flex-column">
+                            <div className="d-flex justify-content-between align-items-start mb-3">
+                              <div>
+                                <h5 className="text-light fw-bold mb-1">
+                                  {project.title}
+                                  <span className="text-info blink-effect ms-1">_</span>
+                                </h5>
+                                {/* Show ID under title */}
+                                <small className="text-info opacity-75">
+                                  <i className="bi bi-hash me-1"></i>
+                                  ID: {displayId}
+                                </small>
+                              </div>
+                              <div className="d-flex gap-2">
+                                {project.live && project.live !== '#' && (
+                                  <i className="bi bi-rocket-takeoff text-success fs-5 float-effect"></i>
+                                )}
+                                {project.github && project.github !== '#' && (
+                                  <i className="bi bi-github text-light fs-5"></i>
+                                )}
+                              </div>
+                            </div>
+
+                            <p className="text-light opacity-75 mb-4 flex-grow-1" style={{ fontSize: '0.9rem' }}>
+                              {project.description && project.description.length > 120
+                                ? `${project.description.substring(0, 120)}...`
+                                : project.description || 'A fantastic project showcasing modern web development skills.'}
+                            </p>
+
+                            {project.technologies && project.technologies.length > 0 && (
+                              <div className="mb-4">
+                                <h6 className="text-info mb-2">
+                                  <i className="bi bi-tags me-1"></i>
+                                  Technologies
+                                </h6>
+                                <div className="d-flex flex-wrap gap-2">
+                                  {project.technologies.slice(0, 3).map((tech, techIndex) => (
+                                    <span
+                                      key={techIndex}
+                                      className="badge bg-info bg-opacity-10 border border-info border-opacity-25 text-info px-2 py-1 glow-effect"
+                                    >
+                                      {tech}
+                                    </span>
+                                  ))}
+                                  {project.technologies.length > 3 && (
+                                    <span className="badge bg-dark border border-info border-opacity-25 text-info px-2 py-1 glow-effect">
+                                      +{project.technologies.length - 3} more
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+
+                            <div className="d-flex gap-2 mt-3 pt-3 border-top border-light border-opacity-25">
+                              <button
+                                className="btn btn-outline-info btn-sm flex-fill hover-scale"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (project.github && project.github !== '#') {
+                                    window.open(project.github, '_blank');
+                                  }
+                                }}
+                                disabled={!project.github || project.github === '#'}
+                                style={{ transition: 'all 0.3s ease' }}
+                                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                              >
+                                <i className="bi bi-github me-1"></i>
+                                Code
+                              </button>
+
+                              <button
+                                className="btn btn-sm flex-fill hover-scale"
+                                style={{
+                                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                  border: 'none',
+                                  color: 'white',
+                                  position: 'relative',
+                                  overflow: 'hidden',
+                                  transition: 'all 0.3s ease'
+                                }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (project.live && project.live !== '#') {
+                                    window.open(project.live, '_blank');
+                                  }
+                                }}
+                                disabled={!project.live || project.live === '#'}
+                                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                              >
+                                <span className="position-relative z-1">
+                                  <i className="bi bi-rocket-takeoff me-1 rocket-effect"></i>
+                                  Live Demo
+                                </span>
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="card-footer bg-transparent border-top border-info border-opacity-25 py-3">
+                            <div className="d-flex justify-content-between align-items-center">
+                              <div className="d-flex align-items-center">
+                                <div className="rounded-circle bg-info bg-opacity-10 p-1 me-2 pulse-effect">
+                                  <i className="bi bi-person-circle text-info"></i>
+                                </div>
+                                <small className="text-light">
+                                  By {userData.name}
+                                </small>
+                              </div>
+                              <small className="text-info">
+                                <i className="bi bi-clock me-1"></i>
+                                {project.date || 'Recent'}
+                              </small>
+                            </div>
                           </div>
                         </div>
-                      )}
-
-                      <div className="d-flex gap-2 mt-3 pt-3 border-top border-light border-opacity-25">
-                        <button
-                          className="btn btn-outline-info btn-sm flex-fill hover-scale"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (project.github && project.github !== '#') {
-                              window.open(project.github, '_blank');
-                            }
-                          }}
-                          disabled={!project.github || project.github === '#'}
-                          style={{ transition: 'all 0.3s ease' }}
-                          onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-                          onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                        >
-                          <i className="bi bi-github me-1"></i>
-                          Code
-                        </button>
-
-                        <button
-                          className="btn btn-sm flex-fill hover-scale"
-                          style={{
-                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                            border: 'none',
-                            color: 'white',
-                            position: 'relative',
-                            overflow: 'hidden',
-                            transition: 'all 0.3s ease'
-                          }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (project.live && project.live !== '#') {
-                              window.open(project.live, '_blank');
-                            }
-                          }}
-                          disabled={!project.live || project.live === '#'}
-                          onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-                          onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                        >
-                          <span className="position-relative z-1">
-                            <i className="bi bi-rocket-takeoff me-1 rocket-effect"></i>
-                            Live Demo
-                          </span>
-                        </button>
                       </div>
-                    </div>
+                    );
+                  })}
+              </div>
 
-                    <div className="card-footer bg-transparent border-top border-info border-opacity-25 py-3">
-                      <div className="d-flex justify-content-between align-items-center">
-                        <div className="d-flex align-items-center">
-                          <div className="rounded-circle bg-info bg-opacity-10 p-1 me-2 pulse-effect">
-                            <i className="bi bi-person-circle text-info"></i>
-                          </div>
-                          <small className="text-light">
-                            By {userData.name}
-                          </small>
-                        </div>
-                        <small className="text-info">
-                          <i className="bi bi-clock me-1"></i>
-                          {project.date || 'Recent'}
-                        </small>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+              <div className="text-center mt-5">
+                <a href="/project" className="btn btn-outline-info btn-lg px-5 hover-scale bounce-effect">
+                  <i className="bi bi-grid-3x3-gap me-2"></i>
+                  View All Projects
+                </a>
+              </div>
+            </>
+          )}
         </div>
-
-        <div className="text-center mt-5">
-          <a href="/project" className="btn btn-outline-info btn-lg px-5 hover-scale bounce-effect">
-            <i className="bi bi-grid-3x3-gap me-2"></i>
-            View All Projects
-          </a>
-        </div>
-      </>
-    )}
-  </div>
-</section>
+      </section>
       {/* Contact Section */}
       <section
         id="contact"
