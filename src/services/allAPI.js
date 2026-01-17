@@ -85,4 +85,38 @@ export const loginAPI=async(reqBody)=>{
   return await commonAPI("post",`${SERVERURL}/admin-login`,reqBody,{})
 }
 
+// Upload resume (file upload, so we need FormData)
+export const uploadResumeAPI = async (file) => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  return await commonAPI("post", `${SERVERURL}/upload-resume`, formData, {
+    "Content-Type": "multipart/form-data",
+  });
+};
+
+// Get latest resume
+export const getResumeAPI = async () => {
+  const response = await fetch(`${SERVERURL}/getResume`);
+  const data = await response.json();
+  console.log("getResumeAPI response data:", data);
+  return data;  // Make sure this includes _id!
+};
+
+
+// Update resume by id (file upload, FormData)
+export const updateResumeAPI = async (id, file) => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  return await commonAPI("put", `${SERVERURL}/update-resume/${id}`, formData, {
+    "Content-Type": "multipart/form-data",
+  });
+};
+
+// Delete resume by id
+export const deleteResumeAPI = async (id) => {
+  return await commonAPI("delete", `${SERVERURL}/delete-resume/${id}`, null, {});
+};
+
 
