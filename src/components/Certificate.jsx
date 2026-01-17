@@ -5,7 +5,7 @@ import SERVERURL from "../services/serverUrl";
 import { FaArrowLeft, FaDownload, FaExpand, FaTimes, FaFilePdf, FaCertificate, FaStar, FaRocket, FaTrophy, FaFire, FaMagic, FaCrown } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import Confetti from 'react-confetti';
-
+import Achivements from "./Achivements.avif";
 function Certificate() {
   const [certificates, setCertificates] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -84,7 +84,7 @@ function Certificate() {
     return (
       <div
         style={{
-          backgroundImage: `url('https://img.freepik.com/premium-photo/motivational-composition-goal-achievement_23-2150490000.jpg?w=2000')`,
+          backgroundImage: `url(${Achivements})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundAttachment: isMobile ? "scroll" : "fixed",
@@ -169,7 +169,7 @@ function Certificate() {
   return (
     <div
       style={{
-        backgroundImage: `url('https://img.freepik.com/premium-photo/motivational-composition-goal-achievement_23-2150490000.jpg?w=2000')`,
+        backgroundImage: `url(${Achivements})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundAttachment: isMobile ? "scroll" : "fixed",

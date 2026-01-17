@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import ai_resume_builder from "./ai_resume_builder.avif";
 function Resume() {
   const [resume, setResume] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -36,8 +36,7 @@ function Resume() {
     return (
       <div
         style={{
-          backgroundImage:
-            "url(https://static1.makeuseofimages.com/wordpress/wp-content/uploads/2024/04/ai_resume_builder.png)",
+        backgroundImage: `url(${ai_resume_builder})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           minHeight: "100vh",
@@ -87,8 +86,7 @@ function Resume() {
     );
 
   const containerStyle = {
-    backgroundImage:
-      "url(https://static1.makeuseofimages.com/wordpress/wp-content/uploads/2024/04/ai_resume_builder.png)",
+   backgroundImage: `url(${ai_resume_builder})`,
     backgroundSize: "cover",
     backgroundPosition: "center",
     backgroundAttachment: "fixed",
