@@ -3,10 +3,9 @@ import { getAllSkillAPI, getProjectAPI, loginAPI } from "../services/allAPI";
 import axios from "axios";
 import robot from "./robot.png";
 import Modal from 'react-bootstrap/Modal';
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import "../components/home.css";
-
 
 const Home = () => {
 
@@ -37,37 +36,106 @@ const Home = () => {
       const response = await getAllSkillAPI();
       if (response) {
         const skillsData = response.data || response;
-        setSkills({
-          frontend: skillsData.frontend || [],
-          backend: skillsData.backend || [],
-          tools: skillsData.tools || []
-        });
+        // Initialize all categories with empty arrays first
+        const organizedSkills = {
+          frontend: [],
+          backend: [],
+          tools: [],
+          programmingLanguage: []
+        };
+
+        // Check if skillsData is an array or object
+        if (Array.isArray(skillsData)) {
+          // If it's an array, categorize by skill.category
+          skillsData.forEach(skill => {
+            if (skill.category) {
+              switch (skill.category.toLowerCase()) {
+                case 'frontend':
+                  organizedSkills.frontend.push(skill);
+                  break;
+                case 'backend':
+                  organizedSkills.backend.push(skill);
+                  break;
+                case 'tools':
+                  organizedSkills.tools.push(skill);
+                  break;
+                case 'programminglanguage':
+                  organizedSkills.programmingLanguage.push(skill);
+                  break;
+                default:
+                  // Try to match other possible formats
+                  if (skill.category.includes('programming') || skill.category.includes('language')) {
+                    organizedSkills.programmingLanguage.push(skill);
+                  } else if (skill.category.includes('frontend')) {
+                    organizedSkills.frontend.push(skill);
+                  } else if (skill.category.includes('backend')) {
+                    organizedSkills.backend.push(skill);
+                  } else {
+                    organizedSkills.tools.push(skill);
+                  }
+              }
+            }
+          });
+        } else if (typeof skillsData === 'object') {
+          // If it's already an object with categories
+          organizedSkills.frontend = skillsData.frontend || [];
+          organizedSkills.backend = skillsData.backend || [];
+          organizedSkills.tools = skillsData.tools || [];
+          organizedSkills.programmingLanguage = skillsData.programmingLanguage || [];
+        }
+
+        setSkills(organizedSkills);
       }
     } catch (error) {
       console.error("Error fetching skills:", error);
       setSkills({
         frontend: [],
         backend: [],
-        tools: []
+        tools: [],
+        programmingLanguage: []
       });
     }
   };
 
-  const fetchProjects = async () => {
-    try {
-      setProjectLoading(true);
-      const response = await getProjectAPI();
-      if (response && response.data) {
-        const projectsData = response.data.slice(0, 5);
-        setProjects(projectsData);
-      }
-    } catch (error) {
-      console.error("Error fetching projects:", error);
-      setProjects([]);
-    } finally {
-      setProjectLoading(false);
+const fetchProjects = async () => {
+  try {
+    setProjectLoading(true);
+    const response = await getProjectAPI();
+    if (response && response.data) {
+      // First, sort the projects by ID in ascending order (1, 2, 3...)
+      const sortedProjects = response.data.sort((a, b) => {
+        // Convert IDs to numbers for proper numeric sorting
+        const idA = a.id ? parseInt(a.id.toString().trim()) : 999999;
+        const idB = b.id ? parseInt(b.id.toString().trim()) : 999999;
+        
+        // Handle NaN cases
+        if (isNaN(idA) && isNaN(idB)) return 0;
+        if (isNaN(idA)) return 1; // Projects without ID go last
+        if (isNaN(idB)) return -1; // Projects with ID come first
+        
+        // Ascending order: 1, 2, 3...
+        return idA - idB;
+      });
+      
+      // Then take the first 5 projects
+      const projectsData = sortedProjects.slice(0, 5);
+      
+      // Log for debugging
+      console.log("Sorted projects:", projectsData.map(p => ({
+        id: p.id,
+        title: p.title,
+        parsedId: p.id ? parseInt(p.id.toString().trim()) : 'N/A'
+      })));
+      
+      setProjects(projectsData);
     }
-  };
+  } catch (error) {
+    console.error("Error fetching projects:", error);
+    setProjects([]);
+  } finally {
+    setProjectLoading(false);
+  }
+};
 
   useEffect(() => {
     const handleScroll = () => {
@@ -232,6 +300,7 @@ const Home = () => {
         }
       });
     });
+  
 
     // Add scroll progress indicator
     const createScrollProgress = () => {
@@ -345,11 +414,27 @@ const Home = () => {
     // Trigger once on load
     handleSkillsScroll();
 
+  
+
     return () => window.removeEventListener('scroll', handleSkillsScroll);
   }, []);
-
-
-
+  // Add this function outside the JSX
+const scrollToProjects = () => {
+  console.log('Scrolling to projects');
+  const projectsSection = document.getElementById('projects');
+  if (projectsSection) {
+    projectsSection.scrollIntoView({ behavior: 'smooth' });
+  } else {
+    // If on a different page, navigate to home first
+    navigate('/');
+    setTimeout(() => {
+      const projectsSection = document.getElementById('projects');
+      if (projectsSection) {
+        projectsSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 500);
+  }
+};
 
   if (loading) {
     return (
@@ -382,17 +467,6 @@ const Home = () => {
             className="robot"
           />
         </button>
-        {/* <button 
-          className="robot-hand-btn"
-          onClick={() => {
-            const contactSection = document.getElementById('contact');
-            if (contactSection) {
-              contactSection.scrollIntoView({ behavior: 'smooth' });
-            }
-          }}
-        >
-  
-        </button> */}
       </div>
 
       {/* Hero Section */}
@@ -428,15 +502,29 @@ const Home = () => {
                 {description || "No description available."}
               </p>
 
-              <div className="d-flex gap-3 mt-4 animate-slide-up" style={{ animationDelay: '0.8s' }}>
-                <a href="#contact" className="btn btn-info btn-lg px-4">
-                  <i className="bi bi-chat-dots me-2"></i>Get In Touch
-                </a>
-                <a href="#projects" className="btn btn-outline-info btn-lg px-4">
-                  <i className="bi bi-briefcase me-2"></i>View Projects
-                </a>
-              </div>
 
+
+
+<div className="d-flex p-3 me-2 gap-3 mt-4" style={{ animationDelay: '0.8s' }}>
+  <button 
+    onClick={() => {
+      console.log('Navigating to education');
+      navigate('/education');
+    }}
+    className="btn btn-info btn-lg px-4 animate-slide-up"
+    style={{ animationDelay: '0.8s' }}
+  >
+    <i className="bi bi-chat-dots me-2"></i>See Education & Internships
+  </button>
+  
+  <button 
+    onClick={scrollToProjects}
+    className="btn btn-outline-info btn-lg px-4 animate-slide-up"
+    style={{ animationDelay: '0.8s' }}
+  >
+    <i className="bi bi-briefcase me-2"></i>View Projects
+  </button>
+</div>
               <div className="mt-4 d-flex gap-3 animate-slide-up" style={{ animationDelay: '1s' }}>
                 <a href={userData.linkedin} target="_blank" rel="noopener noreferrer" className="text-info fs-5">
                   <i className="bi bi-linkedin"></i>
@@ -479,7 +567,6 @@ const Home = () => {
           </div>
         </div>
       </section>
-
 
       {/* About Section */}
       <section
@@ -569,7 +656,6 @@ const Home = () => {
       </section>
 
       {/* Skills Section */}
-
       <section className="container-fluid py-5 skills-section"
         style={{
           backgroundImage: "linear-gradient(rgba(0,0,0,0.9), rgba(0,0,0,0.95)), url(https://wallpapers.com/images/high/gray-best-laptop-beside-iphone-aav9zfw3u9lzah0n.webp)",
@@ -596,11 +682,10 @@ const Home = () => {
 
           <div className="row g-4 skills-container">
             {[
-             
               {
-                title: "Frontend Development",
-                skills: skills.frontend,
-                icon: "bi-display",
+                title: "Programming Languages",
+                skills: skills.programmingLanguage || [],
+                icon: "bi-filetype-jsx",
                 color: "primary",
                 hexColor: "#0d6efd",
                 rgbaColor: "rgba(13, 110, 253, 0.12)",
@@ -609,26 +694,37 @@ const Home = () => {
                 index: 1
               },
               {
+                title: "Frontend Development",
+                skills: skills.frontend || [],
+                icon: "bi-display",
+                color: "primary",
+                hexColor: "#0d6efd",
+                rgbaColor: "rgba(13, 110, 253, 0.12)",
+                rgbaBorder: "rgba(13, 110, 253, 0.25)",
+                delay: "0.2s",
+                index: 2
+              },
+              {
                 title: "Backend Development",
-                skills: skills.backend,
+                skills: skills.backend || [],
                 icon: "bi-server",
                 color: "info",
                 hexColor: "#0dcaf0",
                 rgbaColor: "rgba(13, 202, 240, 0.12)",
                 rgbaBorder: "rgba(13, 202, 240, 0.25)",
-                delay: "0.2s",
-                index: 2
+                delay: "0.3s",
+                index: 3
               },
               {
                 title: "Tools & Platforms",
-                skills: skills.tools,
+                skills: skills.tools || [],
                 icon: "bi-wrench",
                 color: "success",
                 hexColor: "#198754",
                 rgbaColor: "rgba(25, 135, 84, 0.12)",
                 rgbaBorder: "rgba(25, 135, 84, 0.25)",
-                delay: "0.3s",
-                index: 3
+                delay: "0.4s",
+                index: 4
               }
             ].map((category, catIndex) => (
               <div className="col-md-4 skill-category" key={catIndex} data-index={category.index}>
@@ -656,7 +752,7 @@ const Home = () => {
                   </div>
 
                   <div className="card-body skill-card-body">
-                    {category.skills.length === 0 ? (
+                    {(!category.skills || category.skills.length === 0) ? (
                       <div className="text-center py-4 no-skills">
                         <i className="bi bi-tools text-info fs-1 mb-3 skill-empty-icon"></i>
                         <p className="text-light">No skills added yet.</p>
@@ -715,7 +811,7 @@ const Home = () => {
                   <div className="card-footer bg-transparent border-top border-info border-opacity-25 pt-3 skill-card-footer">
                     <small className="text-info opacity-75">
                       <i className="bi bi-info-circle me-1"></i>
-                      <span className="skill-count">{category.skills.length}</span> skills listed
+                      <span className="skill-count">{category.skills?.length || 0}</span> skills listed
                     </small>
                   </div>
                 </div>
@@ -745,186 +841,383 @@ const Home = () => {
           </div>
         </div>
       </section>
-      {/* Projects Section */}
-      <section
-        id="projects"
-        className="container-fluid py-5"
+
+      {/* Additional Programming Skills Section */}
+      <section className="container-fluid py-5 additional-skills-section"
         style={{
           backgroundImage: "linear-gradient(rgba(0,0,0,0.9), rgba(0,0,0,0.95)), url(https://wallpapers.com/images/high/gray-best-laptop-beside-iphone-aav9zfw3u9lzah0n.webp)",
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundAttachment: "fixed"
         }}
+        id="additional-skills"
       >
         <div className="container py-5">
           <div className="text-center mb-5">
             <h5 className="text-info mb-2">
-              <i className="bi bi-fire me-2"></i>
-              Trending Now
+              <i className="bi bi-code-slash me-2"></i>
+              Additional Technical Skills
             </h5>
             <h2 className="fw-bold display-5 text-light mb-3">
-              Featured <span className="text-info">Projects</span>
+              <span>More </span>
+              <span className="text-info">Programming Languages</span>
             </h2>
-            <p className="text-light opacity-75">Explore my latest work with reels-like experience</p>
+            <p className="text-light opacity-75">
+              Other programming languages and technologies I work with
+            </p>
           </div>
 
-          {projectLoading ? (
-            <div className="text-center py-5">
-              <div className="spinner-border text-info" role="status">
-                <span className="visually-hidden">Loading projects...</span>
-              </div>
-              <p className="text-info mt-3">Loading awesome projects...</p>
-            </div>
-          ) : projects.length === 0 ? (
-            <div className="text-center py-5">
-              <i className="bi bi-folder2-open text-info fs-1 mb-3"></i>
-              <h5 className="text-light">No projects found</h5>
-              <p className="text-light opacity-75">Check back soon for amazing projects!</p>
-            </div>
-          ) : (
-            <>
-              <div className="row g-4 justify-content-center">
-                {projects.map((project, index) => (
-                  <div className="col-lg-4 col-md-6" key={project._id || project.id || index}>
-                    <div className="card bg-dark bg-opacity-75 border border-info border-opacity-25 rounded-4 shadow-lg overflow-hidden h-100 hover-lift">
-                      <div className="position-relative">
-                        <div className="project-image-container" style={{ height: '200px', overflow: 'hidden' }}>
-                          {project.image ? (
-                            <img
-                              src={`http://localhost:4000/imguploads/${project.image}`}
-                              alt={project.title}
-                              className="img-fluid w-100 h-100"
+          <div className="row justify-content-center">
+            <div className="col-lg-10">
+              <div className="card bg-dark bg-opacity-50 border border-info border-opacity-25 rounded-4 shadow-lg p-4">
+                <div className="row g-4">
+                  {[
+                    {
+                      name: "JavaScript",
+                      level: 90,
+                      icon: "bi-filetype-js",
+                      color: "#F0DB4F",
+                      description: "Modern ES6+, Async/Await, Promises"
+                    },
+                    {
+                      name: "TypeScript",
+                      level: 80,
+                      icon: "bi-filetype-ts",
+                      color: "#007ACC",
+                      description: "Interfaces, Types, Generics"
+                    },
+                    {
+                      name: "Python",
+                      level: 85,
+                      icon: "bi-filetype-py",
+                      color: "#3776AB",
+                      description: "Django, Flask, Data Analysis"
+                    },
+                    {
+                      name: "Java",
+                      level: 75,
+                      icon: "bi-filetype-java",
+                      color: "#007396",
+                      description: "Spring Boot, OOP, Multithreading"
+                    },
+                    {
+                      name: "C++",
+                      level: 70,
+                      icon: "bi-filetype-cpp",
+                      color: "#00599C",
+                      description: "STL, Algorithms, Data Structures"
+                    },
+                    {
+                      name: "SQL",
+                      level: 85,
+                      icon: "bi-database",
+                      color: "#CC2927",
+                      description: "MySQL, PostgreSQL, Query Optimization"
+                    }
+                  ].map((skill, index) => (
+                    <div className="col-md-4 col-sm-6" key={index}>
+                      <div className="card bg-dark bg-opacity-25 border border-info border-opacity-25 rounded-4 h-100 p-3 hover-lift">
+                        <div className="d-flex align-items-center mb-3">
+                          <div
+                            className="rounded-circle p-2 me-3"
+                            style={{
+                              backgroundColor: `${skill.color}20`,
+                              border: `1px solid ${skill.color}40`
+                            }}
+                          >
+                            <i className={`bi ${skill.icon} fs-4`} style={{ color: skill.color }}></i>
+                          </div>
+                          <div>
+                            <h5 className="text-light mb-0">{skill.name}</h5>
+                            <span
+                              className="badge px-3 py-1 mt-1"
                               style={{
-                                objectFit: 'cover',
-                                transition: 'transform 0.5s ease'
+                                backgroundColor: skill.color,
+                                color: "white"
                               }}
-                            />
-                          ) : (
-                            <div className="w-100 h-100 bg-info bg-opacity-10 d-flex align-items-center justify-content-center">
-                              <i className="bi bi-laptop text-info fs-1"></i>
-                            </div>
+                            >
+                              {skill.level}%
+                            </span>
+                          </div>
+                        </div>
+                        <p className="text-light opacity-75 small mb-0">
+                          {skill.description}
+                        </p>
+                        <div className="progress mt-3" style={{
+                          height: '8px',
+                          borderRadius: '4px',
+                          backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                        }}>
+                          <div
+                            className="progress-bar"
+                            style={{
+                              width: '0%',
+                              backgroundColor: skill.color,
+                              transition: 'width 1s ease-out'
+                            }}
+                            data-level={skill.level}
+                          ></div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="text-center mt-5 pt-4 border-top border-info border-opacity-25">
+                  <p className="text-light mb-3">
+                    <i className="bi bi-lightbulb text-info me-2"></i>
+                    Always learning new languages and technologies to stay current with industry trends
+                  </p>
+                  <a href="#contact" className="btn btn-outline-info">
+                    <i className="bi bi-chat-left-text me-2"></i>
+                    Discuss a project using these technologies
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Projects Section */}
+   <section
+  id="projects"
+  className="container-fluid py-5"
+  style={{
+    backgroundImage: "linear-gradient(rgba(0,0,0,0.9), rgba(0,0,0,0.95)), url(https://wallpapers.com/images/high/gray-best-laptop-beside-iphone-aav9zfw3u9lzah0n.webp)",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    backgroundAttachment: "fixed"
+  }}
+>
+  <div className="container py-5">
+    <div className="text-center mb-5">
+      <h5 className="text-info mb-2">
+        <i className="bi bi-fire me-2"></i>
+        Trending Now
+      </h5>
+      <h2 className="fw-bold display-5 text-light mb-3">
+        Featured <span className="text-info">Projects</span>
+      </h2>
+      <p className="text-light opacity-75">Explore my latest work with reels-like experience</p>
+    </div>
+
+    {projectLoading ? (
+      <div className="text-center py-5">
+        <div className="spinner-border text-info" role="status">
+          <span className="visually-hidden">Loading projects...</span>
+        </div>
+        <p className="text-info mt-3">Loading awesome projects...</p>
+      </div>
+    ) : projects.length === 0 ? (
+      <div className="text-center py-5">
+        <i className="bi bi-folder2-open text-info fs-1 mb-3"></i>
+        <h5 className="text-light">No projects found</h5>
+        <p className="text-light opacity-75">Check back soon for amazing projects!</p>
+      </div>
+    ) : (
+      <>
+        <div className="row g-4 justify-content-center">
+          {projects
+            // Create a copy of the array to avoid mutating the original
+            .slice()
+            // Sort projects by numeric ID in ascending order (1, 2, 3...)
+            .sort((a, b) => {
+              // Debug logging to see what's happening
+              console.log('Sorting:', {
+                aTitle: a.title,
+                aId: a.id,
+                aIdType: typeof a.id,
+                bTitle: b.title,
+                bId: b.id,
+                bIdType: typeof b.id
+              });
+              
+              // Parse IDs as numbers, handle empty/undefined/null cases
+              const idA = a.id ? parseInt(a.id.toString().trim()) : 999999;
+              const idB = b.id ? parseInt(b.id.toString().trim()) : 999999;
+              
+              // If both are not numbers, keep original order
+              if (isNaN(idA) && isNaN(idB)) return 0;
+              // If A is not a number, put it at the end
+              if (isNaN(idA)) return 1;
+              // If B is not a number, put it at the end
+              if (isNaN(idB)) return -1;
+              
+              console.log('Parsed IDs:', { idA, idB, result: idA - idB });
+              return idA - idB; // Ascending order: 1, 2, 3...
+            })
+            // Map through sorted projects
+            .map((project) => {
+              // Get the project ID as a number
+              const projectId = project.id ? parseInt(project.id.toString().trim()) : null;
+              const displayId = !isNaN(projectId) ? projectId : 'N/A';
+              
+              return (
+                <div className="col-lg-4 col-md-6" key={project._id || project.id || displayId}>
+                  <div className="card bg-dark bg-opacity-75 border border-info border-opacity-25 rounded-4 shadow-lg overflow-hidden h-100 hover-lift">
+                    <div className="position-relative">
+                      {/* Project number badge - shows actual ID */}
+                      {!isNaN(projectId) && (
+                        <div className="position-absolute top-0 start-0 m-3" style={{ zIndex: 1 }}>
+                          <span className="badge bg-info bg-opacity-90 border border-info px-3 py-2 rounded-pill fw-bold shadow">
+                            Project #{displayId}
+                          </span>
+                        </div>
+                      )}
+                      
+                      <div className="project-image-container" style={{ height: '200px', overflow: 'hidden' }}>
+                        {project.image ? (
+                          <img
+                            src={`http://localhost:4000/imguploads/${project.image}`}
+                            alt={project.title}
+                            className="img-fluid w-100 h-100"
+                            style={{
+                              objectFit: 'cover',
+                              transition: 'transform 0.5s ease'
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                          />
+                        ) : (
+                          <div className="w-100 h-100 bg-info bg-opacity-10 d-flex align-items-center justify-content-center">
+                            <i className="bi bi-laptop text-info fs-1"></i>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="card-body p-4 d-flex flex-column">
+                      <div className="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                          <h5 className="text-light fw-bold mb-1">
+                            {project.title}
+                            <span className="text-info blink-effect ms-1">_</span>
+                          </h5>
+                          {/* Show ID under title */}
+                          <small className="text-info opacity-75">
+                            <i className="bi bi-hash me-1"></i>
+                            ID: {displayId}
+                          </small>
+                        </div>
+                        <div className="d-flex gap-2">
+                          {project.live && project.live !== '#' && (
+                            <i className="bi bi-rocket-takeoff text-success fs-5 float-effect"></i>
+                          )}
+                          {project.github && project.github !== '#' && (
+                            <i className="bi bi-github text-light fs-5"></i>
                           )}
                         </div>
                       </div>
 
-                      <div className="card-body p-4 d-flex flex-column">
-                        <div className="d-flex justify-content-between align-items-start mb-3">
-                          <h5 className="text-light fw-bold mb-0">
-                            {project.title}
-                            <span className="text-info blink-effect">_</span>
-                          </h5>
-                          <div className="d-flex gap-2">
-                            {project.live && project.live !== '#' && (
-                              <i className="bi bi-rocket-takeoff text-success fs-5 float-effect"></i>
-                            )}
-                            {project.github && project.github !== '#' && (
-                              <i className="bi bi-github text-light fs-5"></i>
+                      <p className="text-light opacity-75 mb-4 flex-grow-1" style={{ fontSize: '0.9rem' }}>
+                        {project.description && project.description.length > 120
+                          ? `${project.description.substring(0, 120)}...`
+                          : project.description || 'A fantastic project showcasing modern web development skills.'}
+                      </p>
+
+                      {project.technologies && project.technologies.length > 0 && (
+                        <div className="mb-4">
+                          <h6 className="text-info mb-2">
+                            <i className="bi bi-tags me-1"></i>
+                            Technologies
+                          </h6>
+                          <div className="d-flex flex-wrap gap-2">
+                            {project.technologies.slice(0, 3).map((tech, techIndex) => (
+                              <span
+                                key={techIndex}
+                                className="badge bg-info bg-opacity-10 border border-info border-opacity-25 text-info px-2 py-1 glow-effect"
+                              >
+                                {tech}
+                              </span>
+                            ))}
+                            {project.technologies.length > 3 && (
+                              <span className="badge bg-dark border border-info border-opacity-25 text-info px-2 py-1 glow-effect">
+                                +{project.technologies.length - 3} more
+                              </span>
                             )}
                           </div>
                         </div>
+                      )}
 
-                        <p className="text-light opacity-75 mb-4 flex-grow-1" style={{ fontSize: '0.9rem' }}>
-                          {project.description && project.description.length > 120
-                            ? `${project.description.substring(0, 120)}...`
-                            : project.description || 'A fantastic project showcasing modern web development skills.'}
-                        </p>
+                      <div className="d-flex gap-2 mt-3 pt-3 border-top border-light border-opacity-25">
+                        <button
+                          className="btn btn-outline-info btn-sm flex-fill hover-scale"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (project.github && project.github !== '#') {
+                              window.open(project.github, '_blank');
+                            }
+                          }}
+                          disabled={!project.github || project.github === '#'}
+                          style={{ transition: 'all 0.3s ease' }}
+                          onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                          onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                        >
+                          <i className="bi bi-github me-1"></i>
+                          Code
+                        </button>
 
-                        {project.technologies && project.technologies.length > 0 && (
-                          <div className="mb-4">
-                            <h6 className="text-info mb-2">
-                              <i className="bi bi-tags me-1"></i>
-                              Technologies
-                            </h6>
-                            <div className="d-flex flex-wrap gap-2">
-                              {project.technologies.slice(0, 3).map((tech, techIndex) => (
-                                <span
-                                  key={techIndex}
-                                  className="badge bg-info bg-opacity-10 border border-info border-opacity-25 text-info px-2 py-1 glow-effect"
-                                >
-                                  {tech}
-                                </span>
-                              ))}
-                              {project.technologies.length > 3 && (
-                                <span className="badge bg-dark border border-info border-opacity-25 text-info px-2 py-1 glow-effect">
-                                  +{project.technologies.length - 3} more
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        )}
-
-                        <div className="d-flex gap-2 mt-3 pt-3 border-top border-light border-opacity-25">
-                          <button
-                            className="btn btn-outline-info btn-sm flex-fill hover-scale"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (project.github && project.github !== '#') {
-                                window.open(project.github, '_blank');
-                              }
-                            }}
-                            disabled={!project.github || project.github === '#'}
-                          >
-                            <i className="bi bi-github me-1"></i>
-                            Code
-                          </button>
-
-                          <button
-                            className="btn btn-sm flex-fill hover-scale"
-                            style={{
-                              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                              border: 'none',
-                              color: 'white',
-                              position: 'relative',
-                              overflow: 'hidden'
-                            }}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (project.live && project.live !== '#') {
-                                window.open(project.live, '_blank');
-                              }
-                            }}
-                            disabled={!project.live || project.live === '#'}
-                          >
-                            <span className="position-relative z-1">
-                              <i className="bi bi-rocket-takeoff me-1 rocket-effect"></i>
-                              Live....
-                            </span>
-                          </button>
-                        </div>
+                        <button
+                          className="btn btn-sm flex-fill hover-scale"
+                          style={{
+                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                            border: 'none',
+                            color: 'white',
+                            position: 'relative',
+                            overflow: 'hidden',
+                            transition: 'all 0.3s ease'
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (project.live && project.live !== '#') {
+                              window.open(project.live, '_blank');
+                            }
+                          }}
+                          disabled={!project.live || project.live === '#'}
+                          onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                          onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                        >
+                          <span className="position-relative z-1">
+                            <i className="bi bi-rocket-takeoff me-1 rocket-effect"></i>
+                            Live Demo
+                          </span>
+                        </button>
                       </div>
+                    </div>
 
-                      <div className="card-footer bg-transparent border-top border-info border-opacity-25 py-3">
-                        <div className="d-flex justify-content-between align-items-center">
-                          <div className="d-flex align-items-center">
-                            <div className="rounded-circle bg-info bg-opacity-10 p-1 me-2 pulse-effect">
-                              <i className="bi bi-person-circle text-info"></i>
-                            </div>
-                            <small className="text-light">
-                              By {userData.name}
-                            </small>
+                    <div className="card-footer bg-transparent border-top border-info border-opacity-25 py-3">
+                      <div className="d-flex justify-content-between align-items-center">
+                        <div className="d-flex align-items-center">
+                          <div className="rounded-circle bg-info bg-opacity-10 p-1 me-2 pulse-effect">
+                            <i className="bi bi-person-circle text-info"></i>
                           </div>
-                          <small className="text-info">
-                            <i className="bi bi-clock me-1"></i>
-                            {project.date || 'Recent'}
+                          <small className="text-light">
+                            By {userData.name}
                           </small>
                         </div>
+                        <small className="text-info">
+                          <i className="bi bi-clock me-1"></i>
+                          {project.date || 'Recent'}
+                        </small>
                       </div>
                     </div>
                   </div>
-                ))}
-              </div>
-
-              <div className="text-center mt-5">
-                <a href="/project" className="btn btn-outline-info btn-lg px-5 hover-scale bounce-effect">
-                  <i className="bi bi-grid-3x3-gap me-2"></i>
-                  View All Projects
-                </a>
-              </div>
-            </>
-          )}
+                </div>
+              );
+            })}
         </div>
-      </section>
 
+        <div className="text-center mt-5">
+          <a href="/project" className="btn btn-outline-info btn-lg px-5 hover-scale bounce-effect">
+            <i className="bi bi-grid-3x3-gap me-2"></i>
+            View All Projects
+          </a>
+        </div>
+      </>
+    )}
+  </div>
+</section>
       {/* Contact Section */}
       <section
         id="contact"
@@ -1113,7 +1406,6 @@ const Home = () => {
           </div>
         </div>
       </footer>
-
 
       <Modal
         show={show}

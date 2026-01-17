@@ -3,7 +3,7 @@ import { addSkillAPI, getAllSkillAPI, deleteSkillAPI } from "../../services/allA
 
 function AdminSkillManagement() {
   const [newSkill, setNewSkill] = useState({ category: "frontend", name: "", level: "" });
-  const [skills, setSkills] = useState({ frontend: [], backend: [], tools: [] });
+  const [skills, setSkills] = useState({ frontend: [], backend: [], tools: [], programmingLanguage: [] });
 
   // Fetch skills from backend
   const fetchSkills = async () => {
@@ -54,28 +54,24 @@ function AdminSkillManagement() {
   };
 
   // New: Remove skill handler
-const handleRemoveSkill = async (skillId) => {
-  if (!window.confirm("Are you sure you want to remove this skill?")) return;
+  const handleRemoveSkill = async (skillId) => {
+    if (!window.confirm("Are you sure you want to remove this skill?")) return;
 
-  try {
-    const response = await deleteSkillAPI(skillId);
-    console.log("Delete skill response:", response);
+    try {
+      const response = await deleteSkillAPI(skillId);
+      console.log("Delete skill response:", response);
 
-    if (response && response.message === "Skill deleted successfully") {
-      alert("Skill removed successfully");
-      fetchSkills(); // refresh skills list
-    } else {
-      alert("Failed to remove skill");
+      if (response && response.message === "Skill deleted successfully") {
+        alert("Skill removed successfully");
+        fetchSkills(); // refresh skills list
+      } else {
+        alert("Failed to remove skill");
+      }
+    } catch (error) {
+      console.error("Error removing skill:", error);
+      alert("Error removing skill, check console.");
     }
-  } catch (error) {
-    console.error("Error removing skill:", error);
-    alert("Error removing skill, check console.");
-  }
-};
-
-
-
-
+  };
 
   return (
     <section className="container py-5">
@@ -94,6 +90,7 @@ const handleRemoveSkill = async (skillId) => {
             <option value="frontend">Frontend</option>
             <option value="backend">Backend</option>
             <option value="tools">Tools & Platforms</option>
+            <option value="programmingLanguage">Programming Languages</option> {/* FIXED HERE */}
           </select>
         </div>
 
@@ -132,27 +129,56 @@ const handleRemoveSkill = async (skillId) => {
 
       {/* Display Skills */}
       <div className="row">
-        {["frontend", "backend", "tools"].map((category) => (
-          <div key={category} className="col-md-4">
-            <h4 className="text-capitalize">{category}</h4>
-            <ul className="list-group">
-              {skills[category]?.length === 0 ? (
-                <li className="list-group-item">No skills added.</li>
-              ) : (
-                skills[category].map((skill) => (
-                  <li key={skill._id} className="list-group-item d-flex justify-content-between align-items-center">
-                    {skill.name} - {skill.level}%
-                    <button
-                      className="btn btn-sm btn-danger"
-                      onClick={() => handleRemoveSkill(skill._id)}
-                      title="Remove skill"
-                    >
-                      Remove
-                    </button>
-                  </li>
-                ))
-              )}
-            </ul>
+        {["frontend", "backend", "tools", "programmingLanguage"].map((category) => ( // ADDED programmingLanguage HERE
+          <div key={category} className="col-md-3"> {/* Changed to col-md-3 for 4 columns */}
+            <div className="card h-100 shadow-sm">
+              <div className="card-header bg-primary text-white text-capitalize">
+                <h5 className="mb-0">
+                  {category === "programmingLanguage" ? "Programming Languages" : 
+                   category === "frontend" ? "Frontend Development" :
+                   category === "backend" ? "Backend Development" : "Tools & Platforms"}
+                </h5>
+              </div>
+              <div className="card-body p-3">
+                {skills[category]?.length === 0 ? (
+                  <div className="text-center py-3">
+                    <i className="bi bi-tools fs-4 text-muted"></i>
+                    <p className="text-muted mt-2 mb-0">No skills added</p>
+                  </div>
+                ) : (
+                  <ul className="list-group list-group-flush">
+                    {skills[category].map((skill) => (
+                      <li key={skill._id} className="list-group-item d-flex justify-content-between align-items-center px-0">
+                        <div>
+                          <strong>{skill.name}</strong>
+                          <div className="progress mt-1" style={{ height: '6px', width: '100px' }}>
+                            <div 
+                              className="progress-bar bg-success" 
+                              role="progressbar" 
+                              style={{ width: `${skill.level}%` }}
+                              aria-valuenow={skill.level} 
+                              aria-valuemin="0" 
+                              aria-valuemax="100"
+                            ></div>
+                          </div>
+                        </div>
+                        <button
+                          className="btn btn-sm btn-outline-danger"
+                          onClick={() => handleRemoveSkill(skill._id)}
+                          title="Remove skill"
+                        >
+                          <i className="bi bi-trash"></i>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                <div className="mt-3 text-muted small">
+                  <i className="bi bi-info-circle me-1"></i>
+                  Total: {skills[category]?.length || 0} skills
+                </div>
+              </div>
+            </div>
           </div>
         ))}
       </div>

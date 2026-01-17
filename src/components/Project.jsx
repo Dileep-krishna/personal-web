@@ -7,7 +7,6 @@ import axios from 'axios';
 
 import profile from "./profile.jpeg"; 
 
-
 function Project() {
     const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -16,6 +15,26 @@ function Project() {
     const [filter, setFilter] = useState('all');
     const [showProjectModal, setShowProjectModal] = useState(false);
     const [selectedProject, setSelectedProject] = useState(null);
+    const [backgroundIndex, setBackgroundIndex] = useState(0);
+
+    // Array of beautiful background images
+    const backgroundImages = [
+        "https://images.unsplash.com/photo-1518709268805-4e9042af2176?q=80&w=2068&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1555949963-aa79dcee981c?q=80&w=2070&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1517697471339-4aa32003c11a?q=80&w=2076&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1531297484001-80022131f5a1?q=80&w=2020&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=2070&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop"
+    ];
+
+    // Rotate background images
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setBackgroundIndex((prevIndex) => (prevIndex + 1) % backgroundImages.length);
+        }, 8000); // Change image every 8 seconds
+        
+        return () => clearInterval(interval);
+    }, []);
 
     // API call to get all projects
     useEffect(() => {
@@ -63,7 +82,7 @@ function Project() {
         
         if (filter === 'all') return matchesSearch;
         if (filter === 'live') return matchesSearch && project.live && project.live !== '#';
-        if (filter === 'github') return matchesSearch && project.github && project.github !== '#';
+        if (filter === 'github') return matchesSearch && project.github && project.github !== 'github.com/Dileep-krishna?tab=repositories';
         return matchesSearch;
     });
 
@@ -166,20 +185,70 @@ function Project() {
 
     return (
         <div className='project-container' style={{
-            background: 'linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)',
-            backgroundSize: '400% 400%',
-            animation: 'gradient 15s ease infinite',
             minHeight: '100vh',
-            padding: '20px 0'
+            padding: '20px 0',
+            position: 'relative',
+            overflow: 'hidden'
         }}>
             <style>
                 {`
-                @keyframes gradient {
-                    0% { background-position: 0% 50%; }
-                    50% { background-position: 100% 50%; }
-                    100% { background-position: 0% 50%; }
+                /* Animated Background */
+                .animated-background {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    z-index: -2;
+                    opacity: 0.6;
                 }
                 
+                .background-overlay {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: linear-gradient(135deg, 
+                        rgba(15, 12, 41, 0.95) 0%, 
+                        rgba(48, 43, 99, 0.93) 50%, 
+                        rgba(36, 36, 62, 0.96) 100%);
+                    z-index: -1;
+                }
+                
+                @keyframes fadeInOut {
+                    0%, 100% { opacity: 0.4; }
+                    50% { opacity: 0.7; }
+                }
+                
+                @keyframes float {
+                    0%, 100% { transform: translateY(0) rotate(0deg); }
+                    50% { transform: translateY(-20px) rotate(5deg); }
+                }
+                
+                @keyframes pulse {
+                    0%, 100% { transform: scale(1); opacity: 0.3; }
+                    50% { transform: scale(1.1); opacity: 0.5; }
+                }
+                
+                .floating-element {
+                    position: absolute;
+                    background: rgba(102, 126, 234, 0.1);
+                    border: 1px solid rgba(102, 126, 234, 0.2);
+                    border-radius: 20px;
+                    animation: float 6s ease-in-out infinite;
+                    z-index: -1;
+                }
+                
+                .pulsing-element {
+                    position: absolute;
+                    background: radial-gradient(circle, rgba(118, 75, 162, 0.3) 0%, rgba(118, 75, 162, 0) 70%);
+                    border-radius: 50%;
+                    animation: pulse 8s ease-in-out infinite;
+                    z-index: -1;
+                }
+                
+                /* Project Card Animations */
                 .project-card {
                     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
                     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -211,6 +280,14 @@ function Project() {
                     border-color: rgba(102, 126, 234, 0.3);
                 }
                 
+                .project-card .card-img-top {
+                    transition: transform 0.6s ease;
+                }
+                
+                .project-card:hover .card-img-top {
+                    transform: scale(1.1);
+                }
+                
                 .tech-badge {
                     transition: all 0.3s ease;
                 }
@@ -220,9 +297,15 @@ function Project() {
                 }
                 
                 .glass-effect {
-                    background: rgba(255, 255, 255, 0.1);
-                    backdrop-filter: blur(10px);
-                    border: 1px solid rgba(255, 255, 255, 0.2);
+                    background: rgba(255, 255, 255, 0.08);
+                    backdrop-filter: blur(15px);
+                    border: 1px solid rgba(255, 255, 255, 0.15);
+                    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+                }
+                
+                .glass-effect:hover {
+                    background: rgba(255, 255, 255, 0.12);
+                    border-color: rgba(102, 126, 234, 0.4);
                 }
                 
                 .project-modal .modal-content {
@@ -230,44 +313,146 @@ function Project() {
                     overflow: hidden;
                     border: none;
                     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+                    animation: slideUp 0.3s ease-out;
+                }
+                
+                @keyframes slideUp {
+                    from {
+                        opacity: 0;
+                        transform: translateY(50px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+                
+                /* Typewriter effect for titles */
+                .typewriter {
+                    overflow: hidden;
+                    border-right: 3px solid #667eea;
+                    white-space: nowrap;
+                    animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
+                }
+                
+                @keyframes typing {
+                    from { width: 0 }
+                    to { width: 100% }
+                }
+                
+                @keyframes blink-caret {
+                    from, to { border-color: transparent }
+                    50% { border-color: #667eea }
+                }
+                
+                /* Shimmer effect */
+                .shimmer {
+                    background: linear-gradient(
+                        90deg,
+                        rgba(255, 255, 255, 0) 0%,
+                        rgba(255, 255, 255, 0.1) 50%,
+                        rgba(255, 255, 255, 0) 100%
+                    );
+                    background-size: 200% 100%;
+                    animation: shimmer 2s infinite;
+                }
+                
+                @keyframes shimmer {
+                    0% { background-position: -200% 0; }
+                    100% { background-position: 200% 0; }
                 }
                 `}
             </style>
 
-            <Container fluid className="px-lg-5">
+            {/* Animated Background Images */}
+            <div className="animated-background">
+                {backgroundImages.map((image, index) => (
+                    <div
+                        key={index}
+                        style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: '100%',
+                            height: '100%',
+                            backgroundImage: `url(${image})`,
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'center',
+                            backgroundAttachment: 'fixed',
+                            opacity: index === backgroundIndex ? 1 : 0,
+                            transition: 'opacity 1.5s ease-in-out',
+                            filter: 'blur(2px) brightness(0.7)'
+                        }}
+                    />
+                ))}
+            </div>
+
+            {/* Gradient Overlay */}
+            <div className="background-overlay"></div>
+
+            {/* Floating Elements */}
+            <div className="floating-element" style={{
+                top: '10%',
+                left: '5%',
+                width: '100px',
+                height: '100px'
+            }}></div>
+            
+            <div className="floating-element" style={{
+                top: '70%',
+                right: '10%',
+                width: '150px',
+                height: '150px'
+            }}></div>
+            
+            <div className="pulsing-element" style={{
+                top: '30%',
+                right: '20%',
+                width: '200px',
+                height: '200px'
+            }}></div>
+            
+            <div className="pulsing-element" style={{
+                bottom: '20%',
+                left: '20%',
+                width: '120px',
+                height: '120px'
+            }}></div>
+
+            <Container fluid className="px-lg-5" style={{ position: 'relative', zIndex: 1 }}>
                 <div className="d-flex flex-column flex-lg-row">
                     {/* Left Side - Header and Information */}
                     <div className="left-side col-lg-3 mb-4 mb-lg-0 pe-lg-4">
                         <div className="sticky-top pt-4" style={{ top: '20px' }}>
                             {/* Header Section */}
                             <div className="mb-5">
-                       <div className="d-flex align-items-center gap-3">
-  {/* Circular Image */}
-  <img
-    src={profile}  // change to your image path
-    alt="Profile"
-    className="rounded-circle border"
-    style={{
-      width: "55px",
-      height: "55px",
-      objectFit: "cover"
-    }}
-  />
+                                <div className="d-flex align-items-center gap-3">
+                                    {/* Circular Image */}
+                                    <img
+                                        src={profile}
+                                        alt="Profile"
+                                        className="rounded-circle border shimmer"
+                                        style={{
+                                            width: "55px",
+                                            height: "55px",
+                                            objectFit: "cover",
+                                            animation: 'pulse 4s ease-in-out infinite'
+                                        }}
+                                    />
 
-  {/* Text */}
-  <div>
-    <h1
-      className="text-white fw-bold mb-0"
-      style={{ fontSize: "2.5rem" }}
-    >
-      My Projects
-    </h1>
-    <p className="text-light opacity-75 mb-0">
-      Crafted with passion and precision
-    </p>
-  </div>
-</div>
-
+                                    {/* Text */}
+                                    <div>
+                                        <h1
+                                            className="text-white fw-bold mb-0"
+                                            style={{ fontSize: "2.5rem" }}
+                                        >
+                                            <span className="typewriter">My Projects</span>
+                                        </h1>
+                                        <p className="text-light opacity-75 mb-0 mt-2">
+                                            Crafted with passion and precision
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
                             
                             {/* Back Button */}
@@ -276,7 +461,7 @@ function Project() {
                                     <Button 
                                         variant="outline-light" 
                                         size="lg" 
-                                        className="w-100 py-3 d-flex align-items-center justify-content-center"
+                                        className="w-100 py-3 d-flex align-items-center justify-content-center glass-effect"
                                         style={{
                                             borderRadius: '12px',
                                             borderWidth: '2px',
@@ -300,7 +485,7 @@ function Project() {
                             {/* Statistics Section */}
                             <div className="glass-effect rounded-3 p-4 mb-5">
                                 <h4 className="text-warning mb-4 d-flex align-items-center">
-                                    <i className="bi bi-bar-chart-fill me-2"></i>
+                                    <i className="bi bi-bar-chart-fill me-2 shimmer" style={{ animationDelay: '0.5s' }}></i>
                                     Project Analytics
                                 </h4>
                                 <div className="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-light border-opacity-25">
@@ -309,18 +494,6 @@ function Project() {
                                         {projects.length}
                                     </Badge>
                                 </div>
-                                {/* <div className="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-light border-opacity-25">
-                                    <span className="text-light">Live Demos</span>
-                                    <Badge pill bg="success" className="fs-6 px-3 py-2">
-                                        {projects.filter(p => p.live && p.live !== '#').length}
-                                    </Badge>
-                                </div> */}
-                                {/* <div className="d-flex justify-content-between align-items-center">
-                                    <span className="text-light">GitHub Repos</span>
-                                    <Badge pill bg="dark" className="fs-6 px-3 py-2">
-                                        {projects.filter(p => p.github && p.github !== '#').length}
-                                    </Badge>
-                                </div> */}
                             </div>
                             
                             {/* Technologies Used */}
@@ -338,14 +511,15 @@ function Project() {
                                             style={{
                                                 background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                                                 border: 'none',
-                                                cursor: 'pointer'
+                                                cursor: 'pointer',
+                                                animationDelay: `${index * 0.1}s`
                                             }}
                                             onMouseEnter={(e) => {
-                                                e.target.style.transform = 'translateY(-2px)';
+                                                e.target.style.transform = 'translateY(-2px) scale(1.1)';
                                                 e.target.style.boxShadow = '0 5px 15px rgba(102, 126, 234, 0.4)';
                                             }}
                                             onMouseLeave={(e) => {
-                                                e.target.style.transform = 'translateY(0)';
+                                                e.target.style.transform = 'translateY(0) scale(1)';
                                                 e.target.style.boxShadow = 'none';
                                             }}
                                         >
@@ -371,7 +545,8 @@ function Project() {
                                             display: 'flex',
                                             alignItems: 'center',
                                             justifyContent: 'center',
-                                            marginRight: '10px'
+                                            marginRight: '10px',
+                                            animation: 'pulse 2s ease-in-out infinite'
                                         }}>
                                             <i className="bi bi-envelope text-white"></i>
                                         </div>
@@ -388,7 +563,9 @@ function Project() {
                                             display: 'flex',
                                             alignItems: 'center',
                                             justifyContent: 'center',
-                                            marginRight: '10px'
+                                            marginRight: '10px',
+                                            animation: 'pulse 2s ease-in-out infinite',
+                                            animationDelay: '0.5s'
                                         }}>
                                             <i className="bi bi-github text-white"></i>
                                         </div>
@@ -397,7 +574,7 @@ function Project() {
                                 </div>
                                 <div className="text-center mt-4 pt-3 border-top border-light border-opacity-25">
                                     <p className="mb-0 text-warning d-flex align-items-center justify-content-center">
-                                        <i className="bi bi-heart-fill me-2 text-danger"></i>
+                                        <i className="bi bi-heart-fill me-2 text-danger" style={{ animation: 'pulse 1s ease-in-out infinite' }}></i>
                                         Made by Dileep Krishna
                                     </p>
                                 </div>
@@ -427,14 +604,23 @@ function Project() {
                                             style={{
                                                 background: 'rgba(255, 255, 255, 0.1)',
                                                 border: '1px solid rgba(255, 255, 255, 0.2)',
-                                                color: 'white'
+                                                color: 'white',
+                                                transition: 'all 0.3s ease'
+                                            }}
+                                            onFocus={(e) => {
+                                                e.target.style.background = 'rgba(255, 255, 255, 0.2)';
+                                                e.target.style.boxShadow = '0 0 0 3px rgba(102, 126, 234, 0.2)';
+                                            }}
+                                            onBlur={(e) => {
+                                                e.target.style.background = 'rgba(255, 255, 255, 0.1)';
+                                                e.target.style.boxShadow = 'none';
                                             }}
                                         />
                                     </InputGroup>
                                 </div>
                                 <div className="col-md-6">
                                     <div className="d-flex flex-wrap gap-2">
-                                        {['all', 'live', 'github'].map((filterType) => (
+                                        {['all', 'live', 'github'].map((filterType, index) => (
                                             <Button
                                                 key={filterType}
                                                 variant={filter === filterType ? 'primary' : 'outline-light'}
@@ -444,11 +630,25 @@ function Project() {
                                                     background: filter === filterType 
                                                         ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' 
                                                         : 'transparent',
-                                                    border: filter === filterType ? 'none' : '1px solid rgba(255, 255, 255, 0.3)'
+                                                    border: filter === filterType ? 'none' : '1px solid rgba(255, 255, 255, 0.3)',
+                                                    animationDelay: `${index * 0.1}s`,
+                                                    transition: 'all 0.3s ease'
+                                                }}
+                                                onMouseEnter={(e) => {
+                                                    if (filter !== filterType) {
+                                                        e.target.style.background = 'rgba(255, 255, 255, 0.1)';
+                                                        e.target.style.transform = 'translateY(-2px)';
+                                                    }
+                                                }}
+                                                onMouseLeave={(e) => {
+                                                    if (filter !== filterType) {
+                                                        e.target.style.background = 'transparent';
+                                                        e.target.style.transform = 'translateY(0)';
+                                                    }
                                                 }}
                                             >
                                                 {filterType === 'all' ? 'All Projects' : 
-                                                 filterType === 'live' ? 'Live Demos' : 'GitHub Repos'}
+                                                 filterType === 'live' ? '' : ''}
                                             </Button>
                                         ))}
                                     </div>
@@ -459,16 +659,22 @@ function Project() {
                         {/* Loading State */}
                         {loading && (
                             <div className="text-center py-5">
-                                <div className="spinner-border text-primary" role="status" style={{ width: '3rem', height: '3rem' }}>
+                                <div className="spinner-border text-primary" role="status" style={{ 
+                                    width: '3rem', 
+                                    height: '3rem',
+                                    animation: 'pulse 1s ease-in-out infinite'
+                                }}>
                                     <span className="visually-hidden">Loading...</span>
                                 </div>
-                                <p className="text-light mt-3">Loading amazing projects...</p>
+                                <p className="text-light mt-3" style={{ animation: 'fadeInOut 2s ease-in-out infinite' }}>
+                                    Loading amazing projects...
+                                </p>
                             </div>
                         )}
 
                         {/* Error State */}
                         {error && !loading && (
-                            <div className="alert alert-danger" role="alert">
+                            <div className="alert alert-danger glass-effect" role="alert">
                                 {error}
                             </div>
                         )}
@@ -478,13 +684,15 @@ function Project() {
                             <>
                                 <Row xs={1} md={2} xl={3} className="g-4">
                                     {filteredProjects.map((project, index) => (
-                                        <Col key={project._id || project.id || index}>
+                                        <Col key={project._id || project.id || index} style={{
+                                            animation: `slideUp 0.5s ease-out ${index * 0.1}s both`
+                                        }}>
                                             <Card 
                                                 className="h-100 shadow-lg border-0 project-card"
                                                 onClick={() => handleProjectClick(project)}
                                                 style={{ cursor: 'pointer' }}
                                             >
-                                                <div className="position-relative">
+                                                <div className="position-relative overflow-hidden">
                                                     <Card.Img
                                                         variant="top"
                                                         src={`http://localhost:4000/imguploads/${project.image}`}
@@ -499,7 +707,8 @@ function Project() {
                                                         right: '10px',
                                                         background: 'rgba(0,0,0,0.7)',
                                                         borderRadius: '20px',
-                                                        padding: '5px 15px'
+                                                        padding: '5px 15px',
+                                                        backdropFilter: 'blur(10px)'
                                                     }}>
                                                         <Badge bg="transparent" className="text-white">
                                                             #{project.id || index + 1}
@@ -513,7 +722,7 @@ function Project() {
                                                         </Card.Title>
                                                         <div className="d-flex gap-1">
                                                             {project.live && project.live !== '#' && (
-                                                                <i className="bi bi-rocket-takeoff text-success"></i>
+                                                                <i className="bi bi-rocket-takeoff text-success" style={{ animation: 'float 3s ease-in-out infinite' }}></i>
                                                             )}
                                                             {project.github && project.github !== '#' && (
                                                                 <i className="bi bi-github text-light"></i>
@@ -537,6 +746,7 @@ function Project() {
                                                                 window.open(project.github, '_blank');
                                                             }}
                                                             disabled={!project.github || project.github === '#'}
+                                                            className="glass-effect"
                                                         >
                                                             <i className="bi bi-github me-1"></i>
                                                             Code
@@ -553,6 +763,7 @@ function Project() {
                                                                 window.open(project.live, '_blank');
                                                             }}
                                                             disabled={!project.live || project.live === '#'}
+                                                            className="glass-effect"
                                                         >
                                                             <i className="bi bi-rocket-takeoff me-1"></i>
                                                             Live....
@@ -566,7 +777,7 @@ function Project() {
 
                                 {/* Empty State */}
                                 {filteredProjects.length === 0 && (
-                                    <div className="text-center py-5">
+                                    <div className="text-center py-5" style={{ animation: 'fadeInOut 3s ease-in-out infinite' }}>
                                         <div style={{
                                             width: '150px',
                                             height: '150px',
@@ -575,7 +786,9 @@ function Project() {
                                             borderRadius: '50%',
                                             display: 'flex',
                                             alignItems: 'center',
-                                            justifyContent: 'center'
+                                            justifyContent: 'center',
+                                            backdropFilter: 'blur(10px)',
+                                            animation: 'pulse 2s ease-in-out infinite'
                                         }}>
                                             <i className="bi bi-folder-x text-light" style={{ fontSize: '4rem' }}></i>
                                         </div>
@@ -587,6 +800,7 @@ function Project() {
                                                 setSearchTerm('');
                                                 setFilter('all');
                                             }}
+                                            className="glass-effect"
                                         >
                                             <i className="bi bi-arrow-clockwise me-2"></i>
                                             Reset Filters
@@ -595,7 +809,8 @@ function Project() {
                                 )}
 
                                 {/* Results Count */}
-                                <div className="mt-4 text-light opacity-75">
+                                <div className="mt-4 text-light opacity-75 glass-effect p-3 rounded-3">
+                                    <i className="bi bi-info-circle me-2 text-info"></i>
                                     Showing {filteredProjects.length} of {projects.length} projects
                                 </div>
                             </>

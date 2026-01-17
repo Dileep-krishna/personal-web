@@ -9,9 +9,12 @@ import AdminHome from './admin/pages/AdminHome'
 import AdminProjectManagement from './admin/pages/AdminProjectManagement'
 import AdminProfileMangent from './admin/pages/AdminProfileMangent'
 import AdminSkillManagement from './admin/pages/AdminSkillManagement'
-
 import AdminProtectedRoute from './admin/pages/AdminProtectedRoute'
+
 import PageNotFound from './components/pageNotFound'
+import Education from './components/Education'
+import AdminResumeController from './admin/pages/AdminResumeController'
+import Resume from './components/Resume'
 
 function App() {
   return (
@@ -22,6 +25,8 @@ function App() {
         <Route path='/project' element={<Project />} />
         <Route path='/login' element={<Login />} />
         <Route path='/home' element={<Home />} />
+        <Route path='/education' element={<Education/>} />
+        <Route path='/resume' element={<Resume/>} />
      
         <Route path="*" element={<PageNotFound />} />
 
@@ -59,6 +64,14 @@ function App() {
           element={
             <AdminProtectedRoute>
               <AdminSkillManagement />
+            </AdminProtectedRoute>
+          }
+        />
+           <Route
+          path='/admin-resume'
+          element={
+            <AdminProtectedRoute>
+              <AdminResumeController />
             </AdminProtectedRoute>
           }
         />

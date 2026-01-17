@@ -84,30 +84,42 @@ function AdminProjects() {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
 
-  const getAllProject = async (pageNumber = 1) => {
-    setLoading(true);
-    try {
-      const res = await axios.get(`http://localhost:4000/all-project?page=${pageNumber}&limit=${limit}`);
 
-      console.log("FULL RES 👉", res);
-      console.log("DATA 👉", res.data.data);
-      console.log("SUCCESS 👉", res.data.success);
+// In the getAllProject function, change the sorting to ascending order:
+const getAllProject = async (pageNumber = 1) => {
+  setLoading(true);
+  try {
+    const res = await axios.get(`http://localhost:4000/all-project?page=${pageNumber}&limit=${limit}`);
 
-      if (res.data.success === true) {
-        if (pageNumber === 1) {
-          setProjects(res.data.data);
-        } else {
-          setProjects(prevProjects => [...prevProjects, ...res.data.data]);
-        }
-        setPage(res.data.page);
-        setTotalPages(res.data.totalPages);
+    console.log("FULL RES 👉", res);
+    console.log("DATA 👉", res.data.data);
+    console.log("SUCCESS 👉", res.data.success);
+
+    if (res.data.success === true) {
+      let sortedProjects = res.data.data;
+      
+      // Sort projects by custom ID in ASCENDING order (lower IDs first - 1, 2, 3...)
+      sortedProjects.sort((a, b) => {
+        // Convert to numbers for proper numeric sorting
+        const idA = parseInt(a.id) || 0;
+        const idB = parseInt(b.id) || 0;
+        return idA - idB; // ASCENDING order (lowest ID first)
+      });
+
+      if (pageNumber === 1) {
+        setProjects(sortedProjects);
+      } else {
+        setProjects(prevProjects => [...prevProjects, ...sortedProjects]);
       }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
+      setPage(res.data.page);
+      setTotalPages(res.data.totalPages);
     }
-  };
+  } catch (error) {
+    console.error(error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleEdit = async () => {
     try {
@@ -348,105 +360,127 @@ function AdminProjects() {
               </Card>
             )}
 
-            <Row xs={1} md={2} lg={3} className="g-4">
-              {projects.map((project) => (
-                <Col key={project._id}>
-                  <Card className="h-100 shadow border-0" style={{
-                    borderRadius: "15px",
-                    overflow: "hidden",
-                    transition: "all 0.3s ease",
-                    background: "rgba(255, 255, 255, 0.95)"
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = "translateY(-10px)";
-                    e.currentTarget.style.boxShadow = "0 15px 30px rgba(0, 0, 0, 0.2)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = "translateY(0)";
-                    e.currentTarget.style.boxShadow = "0 0 20px rgba(0, 0, 0, 0.1)";
-                  }}>
-                    <div style={{ position: "relative" }}>
-                      <Card.Img
-                        src={`http://localhost:4000/imguploads/${project.image}`}
-                        style={{ 
-                          height: "200px", 
-                          objectFit: "cover",
-                          width: "100%"
-                        }}
-                      />
-                      <Badge 
-                        bg={project.status === "Published" ? "success" : "warning"}
-                        className="position-absolute top-0 end-0 m-3"
-                        style={{ 
-                          borderRadius: "10px",
-                          padding: "5px 15px",
-                          fontSize: "0.9rem"
-                        }}
-                      >
-                        {project.status}
-                      </Badge>
-                    </div>
-                    
-                    <Card.Body className="pb-0">
-                      <div className="d-flex justify-content-between align-items-start mb-3">
-                        <Card.Title className="fw-bold text-dark" style={{ fontSize: "1.2rem" }}>
-                          {project.title}
-                        </Card.Title>
-                      </div>
-                      
-                      <Card.Text className="text-muted mb-4" style={{
-                        fontSize: "0.9rem",
-                        lineHeight: "1.5",
-                        maxHeight: "60px",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis"
-                      }}>
-                        {project.description}
-                      </Card.Text>
-                      
-                      <div className="d-flex justify-content-between mt-auto">
-                        <Button 
-                          onClick={() => openEditModal(project)} 
-                          variant="primary"
-                          style={{
-                            borderRadius: "8px",
-                            padding: "8px 20px",
-                            background: "linear-gradient(45deg, #667eea, #764ba2)",
-                            border: "none"
-                          }}
-                        >
-                          <i className="bi bi-pencil-square me-1"></i>
-                          Edit
-                        </Button>
-                        
-                        <Button 
-                          onClick={() => handleDelete(project._id)} 
-                          variant="outline-danger"
-                          style={{
-                            borderRadius: "8px",
-                            padding: "8px 20px",
-                            borderWidth: "2px"
-                          }}
-                        >
-                          <i className="bi bi-trash me-1"></i>
-                          Delete
-                        </Button>
-                      </div>
-                    </Card.Body>
-                    
-                    <Card.Footer className="text-center text-muted py-3" style={{
-                      background: "rgba(0, 0, 0, 0.02)",
-                      borderTop: "1px solid rgba(0, 0, 0, 0.1)"
-                    }}>
-                      <small className="d-flex align-items-center justify-content-center">
-                        <i className="bi bi-hash me-1"></i>
-                        Project ID: {project.id}
-                      </small>
-                    </Card.Footer>
-                  </Card>
-                </Col>
-              ))}
-            </Row>
+           <Row xs={1} md={2} lg={3} className="g-4">
+  {projects
+    // Sort by custom ID in descending order (highest first)
+      .sort((a, b) => {
+      const idA = parseInt(a.id) || 99999; // High number for items without ID
+      const idB = parseInt(b.id) || 99999;
+      return idA - idB; // ASCENDING order (1, 2, 3...)
+    })
+    .map((project) => (
+      <Col key={project._id}>
+        <Card className="h-100 shadow border-0" style={{
+          borderRadius: "15px",
+          overflow: "hidden",
+          transition: "all 0.3s ease",
+          background: "rgba(255, 255, 255, 0.95)"
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = "translateY(-10px)";
+          e.currentTarget.style.boxShadow = "0 15px 30px rgba(0, 0, 0, 0.2)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = "translateY(0)";
+          e.currentTarget.style.boxShadow = "0 0 20px rgba(0, 0, 0, 0.1)";
+        }}>
+          <div style={{ position: "relative" }}>
+            <Card.Img
+              src={`http://localhost:4000/imguploads/${project.image}`}
+              style={{ 
+                height: "200px", 
+                objectFit: "cover",
+                width: "100%"
+              }}
+            />
+            {/* Add project number badge */}
+            <Badge 
+              bg="info"
+              className="position-absolute top-0 start-0 m-3"
+              style={{ 
+                borderRadius: "10px",
+                padding: "5px 15px",
+                fontSize: "0.9rem",
+                fontWeight: "bold"
+              }}
+            >
+              #{project.id}
+            </Badge>
+            <Badge 
+              bg={project.status === "Published" ? "success" : "warning"}
+              className="position-absolute top-0 end-0 m-3"
+              style={{ 
+                borderRadius: "10px",
+                padding: "5px 15px",
+                fontSize: "0.9rem"
+              }}
+            >
+              {project.status}
+            </Badge>
+          </div>
+          
+          <Card.Body className="pb-0">
+            <div className="d-flex justify-content-between align-items-start mb-3">
+              <Card.Title className="fw-bold text-dark" style={{ fontSize: "1.2rem" }}>
+                {project.title}
+                {/* Show ID in title too */}
+                <span className="text-muted fs-6 ms-2">(ID: {project.id})</span>
+              </Card.Title>
+            </div>
+            
+            <Card.Text className="text-muted mb-4" style={{
+              fontSize: "0.9rem",
+              lineHeight: "1.5",
+              maxHeight: "60px",
+              overflow: "hidden",
+              textOverflow: "ellipsis"
+            }}>
+              {project.description}
+            </Card.Text>
+            
+            <div className="d-flex justify-content-between mt-auto">
+              <Button 
+                onClick={() => openEditModal(project)} 
+                variant="primary"
+                style={{
+                  borderRadius: "8px",
+                  padding: "8px 20px",
+                  background: "linear-gradient(45deg, #667eea, #764ba2)",
+                  border: "none"
+                }}
+              >
+                <i className="bi bi-pencil-square me-1"></i>
+                Edit
+              </Button>
+              
+              <Button 
+                onClick={() => handleDelete(project._id)} 
+                variant="outline-danger"
+                style={{
+                  borderRadius: "8px",
+                  padding: "8px 20px",
+                  borderWidth: "2px"
+                }}
+              >
+                <i className="bi bi-trash me-1"></i>
+                Delete
+              </Button>
+            </div>
+          </Card.Body>
+          
+          <Card.Footer className="text-center text-muted py-3" style={{
+            background: "rgba(0, 0, 0, 0.02)",
+            borderTop: "1px solid rgba(0, 0, 0, 0.1)"
+          }}>
+            <small className="d-flex align-items-center justify-content-center">
+              <i className="bi bi-calendar me-1"></i>
+              {project.date || 'No date specified'}
+            </small>
+          </Card.Footer>
+        </Card>
+      </Col>
+    ))}
+</Row>
             
             {/* Pagination */}
             {totalPages > 1 && (
@@ -625,26 +659,28 @@ function AdminProjects() {
               </Col>
             </Row>
 
-            <Form.Group className="mb-3">
-              <Form.Label className="fw-bold text-dark">Project ID</Form.Label>
-              <Form.Control
-                value={addProjects.id}
-                onChange={(e) =>
-                  setAddProjects({ ...addProjects, id: e.target.value })
-                }
-                type="text"
-                placeholder="Enter unique project ID"
-                className="border-0 shadow-sm"
-                style={{ 
-                  borderRadius: "10px",
-                  padding: "12px",
-                  background: "#f8f9fa"
-                }}
-              />
-              <Form.Text className="text-muted">
-                Use a unique identifier for this project
-              </Form.Text>
-            </Form.Group>
+          <Form.Group className="mb-3">
+  <Form.Label className="fw-bold text-dark">Project ID</Form.Label>
+  <Form.Control
+    value={addProjects.id}
+    onChange={(e) => {
+      // Only allow numbers
+      const value = e.target.value.replace(/\D/g, '');
+      setAddProjects({ ...addProjects, id: value });
+    }}
+    type="text"
+    placeholder="Enter project ID number (e.g., 1, 2, 3...)"
+    className="border-0 shadow-sm"
+    style={{ 
+      borderRadius: "10px",
+      padding: "12px",
+      background: "#f8f9fa"
+    }}
+  />
+  <Form.Text className="text-muted">
+    Use numeric IDs only (1, 2, 3...). Higher numbers = shown first
+  </Form.Text>
+</Form.Group>
           </Form>
         </Modal.Body>
 
@@ -827,26 +863,28 @@ function AdminProjects() {
               </Col>
             </Row>
 
-            <Form.Group className="mb-3">
-              <Form.Label className="fw-bold text-dark">Project ID</Form.Label>
-              <Form.Control
-                value={editProject.id}
-                onChange={(e) =>
-                  setEditProject({ ...editProject, id: e.target.value })
-                }
-                type="text"
-                placeholder="Enter unique project ID"
-                className="border-0 shadow-sm"
-                style={{ 
-                  borderRadius: "10px",
-                  padding: "12px",
-                  background: "#f8f9fa"
-                }}
-              />
-              <Form.Text className="text-muted">
-                Use a unique identifier for this project
-              </Form.Text>
-            </Form.Group>
+          <Form.Group className="mb-3">
+  <Form.Label className="fw-bold text-dark">Project ID</Form.Label>
+  <Form.Control
+    value={editProject.id}
+    onChange={(e) => {
+      // Only allow numbers
+      const value = e.target.value.replace(/\D/g, '');
+      setEditProject({ ...editProject, id: value });
+    }}
+    type="text"
+    placeholder="Enter project ID number"
+    className="border-0 shadow-sm"
+    style={{ 
+      borderRadius: "10px",
+      padding: "12px",
+      background: "#f8f9fa"
+    }}
+  />
+  <Form.Text className="text-muted">
+    Use numeric IDs only. Higher numbers = shown first
+  </Form.Text>
+</Form.Group>
           </Form>
         </Modal.Body>
         <Modal.Footer className="border-0 pt-0">
