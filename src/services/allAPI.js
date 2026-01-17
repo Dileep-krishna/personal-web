@@ -119,4 +119,35 @@ export const deleteResumeAPI = async (id) => {
   return await commonAPI("delete", `${SERVERURL}/delete-resume/${id}`, null, {});
 };
 
+// Add certificate
+export const addCertificateAPI = async (reqBody) => {
+  return await commonAPI(
+    "post",
+    `${SERVERURL}/add-Certificate`,
+    reqBody,
+    {
+      "Content-Type": "multipart/form-data",
+    }
+  );
+};
+// Get all certificates
+export const getAllCertificatesAPI = async () => {
+  return await commonAPI(
+    "get",
+    `${SERVERURL}/all-Certificate`,
+    "",
+    {}
+  );
+};
+
+// Delete certificate by id
+export const deleteCertificateAPI = async (id) => {
+  return await commonAPI(
+    "delete",
+    `${SERVERURL}/certificate/${id}`,
+    null,
+    {}
+  );
+};
+
 

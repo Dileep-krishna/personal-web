@@ -15,6 +15,8 @@ import AdminProfileMangent from './admin/pages/AdminProfileMangent'
 import AdminSkillManagement from './admin/pages/AdminSkillManagement'
 import AdminResumeController from './admin/pages/AdminResumeController'
 import AdminProtectedRoute from './admin/pages/AdminProtectedRoute'
+import AdminCretificate from './admin/pages/AdminCertificate'
+import Certificate from './components/Certificate'
 
 function App() {
   return (
@@ -26,6 +28,7 @@ function App() {
       <Route path='/education' element={<Education />} />
       <Route path='/resume' element={<Resume />} />
       <Route path='/login' element={<Login />} />
+      <Route path='/certificate' element={<Certificate/>} />
 
       {/* 🔐 Admin Protected Routes */}
       <Route
@@ -69,6 +72,14 @@ function App() {
         element={
           <AdminProtectedRoute>
             <AdminResumeController />
+          </AdminProtectedRoute>
+        }
+      />
+          <Route
+        path='/admin-certificate'
+        element={
+          <AdminProtectedRoute>
+            <AdminCretificate />
           </AdminProtectedRoute>
         }
       />

@@ -705,143 +705,251 @@ const Home = () => {
             </p>
           </div>
 
-          <div className="row g-4 skills-container">
-            {[
-              {
-                title: "Programming Languages",
-                skills: skills.programmingLanguage || [],
-                icon: "bi-filetype-jsx",
-                color: "primary",
-                hexColor: "#0d6efd",
-                rgbaColor: "rgba(13, 110, 253, 0.12)",
-                rgbaBorder: "rgba(13, 110, 253, 0.25)",
-                delay: "0.1s",
-                index: 1
-              },
-              {
-                title: "Frontend Development",
-                skills: skills.frontend || [],
-                icon: "bi-display",
-                color: "primary",
-                hexColor: "#0d6efd",
-                rgbaColor: "rgba(13, 110, 253, 0.12)",
-                rgbaBorder: "rgba(13, 110, 253, 0.25)",
-                delay: "0.2s",
-                index: 2
-              },
-              {
-                title: "Backend Development",
-                skills: skills.backend || [],
-                icon: "bi-server",
-                color: "info",
-                hexColor: "#0dcaf0",
-                rgbaColor: "rgba(13, 202, 240, 0.12)",
-                rgbaBorder: "rgba(13, 202, 240, 0.25)",
-                delay: "0.3s",
-                index: 3
-              },
-              {
-                title: "Tools & Platforms",
-                skills: skills.tools || [],
-                icon: "bi-wrench",
-                color: "success",
-                hexColor: "#198754",
-                rgbaColor: "rgba(25, 135, 84, 0.12)",
-                rgbaBorder: "rgba(25, 135, 84, 0.25)",
-                delay: "0.4s",
-                index: 4
-              }
-            ].map((category, catIndex) => (
-              <div className="col-md-4 skill-category" key={catIndex} data-index={category.index}>
-                <div
-                  className="card bg-dark bg-opacity-50 border border-info border-opacity-25 h-100 shadow-lg hover-lift skill-card"
-                >
-                  <div className="card-header bg-transparent border-bottom border-info border-opacity-25 pb-3 skill-card-header">
-                    <div className="d-flex align-items-center">
-                      <div
-                        className="rounded-circle p-3 me-3 skill-icon-container"
-                        style={{
-                          backgroundColor: category.rgbaColor,
-                          border: `1px solid ${category.rgbaBorder}`
-                        }}
-                      >
-                        <i
-                          className={`bi ${category.icon} fs-4 skill-icon`}
-                          style={{ color: category.hexColor }}
-                        ></i>
+          <div className="row">
+            {/* Left side - Skills cards (8 columns) */}
+            <div className="col-lg-8 col-md-12 mb-4 mb-lg-0">
+              <div className="row g-4 skills-container">
+                {[
+                  {
+                    title: "Programming Languages",
+                    skills: skills.programmingLanguage || [],
+                    icon: "bi-filetype-jsx",
+                    color: "primary",
+                    hexColor: "#0d6efd",
+                    rgbaColor: "rgba(13, 110, 253, 0.12)",
+                    rgbaBorder: "rgba(13, 110, 253, 0.25)",
+                    delay: "0.1s",
+                    index: 1
+                  },
+                  {
+                    title: "Frontend Development",
+                    skills: skills.frontend || [],
+                    icon: "bi-display",
+                    color: "primary",
+                    hexColor: "#0d6efd",
+                    rgbaColor: "rgba(13, 110, 253, 0.12)",
+                    rgbaBorder: "rgba(13, 110, 253, 0.25)",
+                    delay: "0.2s",
+                    index: 2
+                  },
+                  {
+                    title: "Backend Development",
+                    skills: skills.backend || [],
+                    icon: "bi-server",
+                    color: "info",
+                    hexColor: "#0dcaf0",
+                    rgbaColor: "rgba(13, 202, 240, 0.12)",
+                    rgbaBorder: "rgba(13, 202, 240, 0.25)",
+                    delay: "0.3s",
+                    index: 3
+                  },
+                  {
+                    title: "Tools & Platforms",
+                    skills: skills.tools || [],
+                    icon: "bi-tools",
+                    color: "warning",
+                    hexColor: "#ffc107",
+                    rgbaColor: "rgba(255, 193, 7, 0.12)",
+                    rgbaBorder: "rgba(255, 193, 7, 0.25)",
+                    delay: "0.4s",
+                    index: 4
+                  }
+                ].map((category, catIndex) => (
+                  <div className="col-md-6 col-lg-6 skill-category" key={catIndex} data-index={category.index}>
+                    <div
+                      className="card bg-dark bg-opacity-50 border border-info border-opacity-25 h-100 shadow-lg hover-lift skill-card"
+                    >
+                      <div className="card-header bg-transparent border-bottom border-info border-opacity-25 pb-3 skill-card-header">
+                        <div className="d-flex align-items-center">
+                          <div
+                            className="rounded-circle p-3 me-3 skill-icon-container"
+                            style={{
+                              backgroundColor: category.rgbaColor,
+                              border: `1px solid ${category.rgbaBorder}`
+                            }}
+                          >
+                            <i
+                              className={`bi ${category.icon} fs-4 skill-icon`}
+                              style={{ color: category.hexColor }}
+                            ></i>
+                          </div>
+                          <h5 className="fw-bold mb-0 text-light skill-category-title">
+                            {category.title}
+                          </h5>
+                        </div>
                       </div>
-                      <h5 className="fw-bold mb-0 text-light skill-category-title">
-                        {category.title}
-                      </h5>
+
+                      <div className="card-body skill-card-body">
+                        {(!category.skills || category.skills.length === 0) ? (
+                          <div className="text-center py-4 no-skills">
+                            <i className="bi bi-tools text-info fs-1 mb-3 skill-empty-icon"></i>
+                            <p className="text-light">No skills added yet.</p>
+                          </div>
+                        ) : (
+                          category.skills.map((skill, skillIndex) => (
+                            <div key={skill._id || skillIndex} className="mb-4 skill-item">
+                              <div className="d-flex justify-content-between align-items-center mb-2 skill-item-header">
+                                <div className="d-flex align-items-center">
+                                  <div
+                                    className="rounded-circle p-2 me-2 skill-item-icon"
+                                    style={{
+                                      backgroundColor: category.rgbaColor,
+                                      border: `1px solid ${category.rgbaBorder}`
+                                    }}
+                                  >
+                                    <i
+                                      className="bi bi-code-slash"
+                                      style={{ color: category.hexColor }}
+                                    ></i>
+                                  </div>
+                                  <span className="text-light fw-semibold skill-name">{skill.name}</span>
+                                </div>
+                                <span
+                                  className="badge px-3 py-1 skill-level"
+                                  style={{
+                                    backgroundColor: category.hexColor,
+                                    color: "white"
+                                  }}
+                                >
+                                  {skill.level}%
+                                </span>
+                              </div>
+                              <div className="progress skill-progress" style={{
+                                height: '10px',
+                                borderRadius: '5px',
+                                backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                              }}>
+                                <div
+                                  className="skill-progress-bar"
+                                  style={{
+                                    width: '0%',
+                                    borderRadius: '5px',
+                                    backgroundColor: category.hexColor,
+                                    height: '100%',
+                                    transition: 'width 0.8s ease-out'
+                                  }}
+                                  data-level={skill.level}
+                                ></div>
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+
+                      <div className="card-footer bg-transparent border-top border-info border-opacity-25 pt-3 skill-card-footer">
+                        <small className="text-info opacity-75">
+                          <i className="bi bi-info-circle me-1"></i>
+                          <span className="skill-count">{category.skills?.length || 0}</span> skills listed
+                        </small>
+                      </div>
                     </div>
                   </div>
+                ))}
+              </div>
+            </div>
 
-                  <div className="card-body skill-card-body">
-                    {(!category.skills || category.skills.length === 0) ? (
-                      <div className="text-center py-4 no-skills">
-                        <i className="bi bi-tools text-info fs-1 mb-3 skill-empty-icon"></i>
-                        <p className="text-light">No skills added yet.</p>
+            {/* Right side - Certificate section (4 columns) */}
+            <div className="col-lg-4 col-md-12">
+              <div className="sticky-top" style={{ top: "20px" }}>
+                <div
+                  className="card bg-dark bg-opacity-75 border border-success border-opacity-25 shadow-lg rounded-4 h-100"
+                  style={{
+                    background: "linear-gradient(135deg, rgba(0,0,0,0.8), rgba(25, 135, 84, 0.1))"
+                  }}
+                >
+                  <div className="card-body p-4 d-flex flex-column justify-content-center">
+                    <div className="text-center mb-4">
+                      <div
+                        className="rounded-circle p-4 mx-auto mb-3"
+                        style={{
+                          backgroundColor: "rgba(25, 135, 84, 0.15)",
+                          border: "3px solid rgba(25, 135, 84, 0.4)",
+                          width: "90px",
+                          height: "90px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          boxShadow: "0 0 30px rgba(25, 135, 84, 0.3)"
+                        }}
+                      >
+                        <i className="bi bi-trophy-fill fs-1" style={{ color: "#ffd700" }}></i>
                       </div>
-                    ) : (
-                      category.skills.map((skill, skillIndex) => (
-                        <div key={skill._id || skillIndex} className="mb-4 skill-item">
-                          <div className="d-flex justify-content-between align-items-center mb-2 skill-item-header">
-                            <div className="d-flex align-items-center">
-                              <div
-                                className="rounded-circle p-2 me-2 skill-item-icon"
-                                style={{
-                                  backgroundColor: category.rgbaColor,
-                                  border: `1px solid ${category.rgbaBorder}`
-                                }}
-                              >
-                                <i
-                                  className="bi bi-code-slash"
-                                  style={{ color: category.hexColor }}
-                                ></i>
-                              </div>
-                              <span className="text-light fw-semibold skill-name">{skill.name}</span>
-                            </div>
-                            <span
-                              className="badge px-3 py-1 skill-level"
-                              style={{
-                                backgroundColor: category.hexColor,
-                                color: "white"
-                              }}
-                            >
-                              {skill.level}%
-                            </span>
-                          </div>
-                          <div className="progress skill-progress" style={{
-                            height: '10px',
-                            borderRadius: '5px',
-                            backgroundColor: 'rgba(255, 255, 255, 0.1)'
-                          }}>
-                            <div
-                              className="skill-progress-bar"
-                              style={{
-                                width: '0%',
-                                borderRadius: '5px',
-                                backgroundColor: category.hexColor,
-                                height: '100%',
-                                transition: 'width 0.8s ease-out'
-                              }}
-                              data-level={skill.level}
-                            ></div>
-                          </div>
+                      <h3 className="fw-bold text-light mb-2">My Achievements</h3>
+                      <p className="text-light opacity-75 mb-4">
+                        Explore my professional certificates, awards, and recognitions
+                      </p>
+                      
+                      <div className="mb-4">
+                        <div className="d-flex justify-content-between align-items-center mb-2">
+                          <span className="text-light">Certificates Earned</span>
+                       
                         </div>
-                      ))
-                    )}
-                  </div>
+                        <div className="d-flex justify-content-between align-items-center mb-2">
+                          <span className="text-light">Professional Awards</span>
+                        
+                        </div>
+                        <div className="d-flex justify-content-between align-items-center">
+                          <span className="text-light">Years of Experience</span>
+                         
+                        </div>
+                      </div>
+                    </div>
 
-                  <div className="card-footer bg-transparent border-top border-info border-opacity-25 pt-3 skill-card-footer">
-                    <small className="text-info opacity-75">
-                      <i className="bi bi-info-circle me-1"></i>
-                      <span className="skill-count">{category.skills?.length || 0}</span> skills listed
-                    </small>
+                    <div className="mt-auto">
+                      <button
+                        onClick={() => navigate("/certificate")}
+                        className="btn btn-success btn-lg w-100 py-3 fw-bold mb-3"
+                        style={{
+                          background: "linear-gradient(135deg, #198754, #157347)",
+                          border: "none",
+                          boxShadow: "0 5px 20px rgba(25, 135, 84, 0.5)",
+                          transition: "all 0.3s ease",
+                          fontSize: "1.1rem"
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.transform = "translateY(-3px)";
+                          e.currentTarget.style.boxShadow = "0 10px 25px rgba(25, 135, 84, 0.7)";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.transform = "translateY(0)";
+                          e.currentTarget.style.boxShadow = "0 5px 20px rgba(25, 135, 84, 0.5)";
+                        }}
+                      >
+                        <i className="bi bi-file-earmark-pdf-fill me-2"></i>
+                        View Certificates Gallery
+                      </button>
+                      
+                      <button
+                        onClick={() => navigate("/resume")}
+                        className="btn btn-outline-light btn-lg w-100 py-3 fw-bold"
+                        style={{
+                          border: "2px solid rgba(255, 255, 255, 0.3)",
+                          transition: "all 0.3s ease"
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.1)";
+                          e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.5)";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = "transparent";
+                          e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.3)";
+                        }}
+                      >
+                        <i className="bi bi-person-badge me-2"></i>
+                        View My Resume
+                      </button>
+                    </div>
+
+                    <div className="text-center mt-4 pt-3 border-top border-success border-opacity-25">
+                      <small className="text-light opacity-75">
+                        <i className="bi bi-star-fill text-warning me-1"></i>
+                        Verified professional achievements
+                      </small>
+                    </div>
                   </div>
                 </div>
               </div>
-            ))}
+            </div>
           </div>
 
           <div className="row mt-5 pt-4 border-top border-info border-opacity-25 skills-cta">
@@ -866,7 +974,6 @@ const Home = () => {
           </div>
         </div>
       </section>
-
       {/* Additional Programming Skills Section */}
       <section className="container-fluid py-5 additional-skills-section"
         style={{

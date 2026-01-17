@@ -155,6 +155,14 @@ function AdminHome() {
             description: "Manage resume",
             route: "/admin-resume",
             delay: "0.4s"
+          },
+                {
+            id: 4,
+            icon: "bi-tools",
+            title: "certificate",
+            description: "Manage Certificate",
+            route: "/admin-certificate",
+            delay: "0.4s"
           }
         ].map((card, index) => (
           <div className="col-md-4" key={card.id}>
