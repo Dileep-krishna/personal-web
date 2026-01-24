@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import "./index.css";
 // 🤖 place image in same folder
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
